@@ -12,10 +12,12 @@ Emulating Pure Blocks
 
 Example:
 
-`while ( pixelColor == Color_Red ) {
+```
+while ( pixelColor == Color_Red ) {
     statement1;
     statement2;
-}`
+}
+```
 
 &nbsp;
 
@@ -23,7 +25,8 @@ One "exception" to the book is switch statements. The reason for this is that "b
 
 Example:
 
-`switch ( pixelColor ) {
+```
+switch ( pixelColor ) {
     case Color_Red:
         statement1;
         statement2;
@@ -32,7 +35,8 @@ Example:
         statement1;
         statement2;
         break; //This should still be here for consistency
-}`
+}
+```
 
 &nbsp;
 
@@ -40,9 +44,11 @@ Single-statement blocks should be enclosed with braces. (For maintainability)
 
 Example:
 
-`if ( expression ) {
+```
+if ( expression ) {
     statement1;
-}`
+}
+```
 
 &nbsp;
 
@@ -55,7 +61,9 @@ Use spaces around array refrences.
 
 Example:
 
-`grossrate[ census[ groupId ].gender, census[ groupId ].ageGroup ]`
+```
+grossrate[ census[ groupId ].gender, census[ groupId ].ageGroup ];
+```
 
 &nbsp;
 
@@ -63,7 +71,9 @@ Use spaces around function arguments.
 
 Example:
 
-`GetCensus( inputFile, empCount, empData, maxEmps, inputError );`
+```
+GetCensus( inputFile, empCount, empData, maxEmps, inputError );
+```
 
 &nbsp;
 
@@ -77,7 +87,9 @@ Put the asterisk for pointers against the variable.
 
 Example:
 
-`File *inputFile;
+```
+File *inputFile;
+```
 
 
 Comments should be the same indentation as their surrounding statements. They should (in general) be preceded by a blank line.
@@ -90,15 +102,13 @@ One argument per line in the header of a function.
 
 Example:
 
-`public void InsertionSort(
-
+```
+public void InsertionSort(
     SortArray data,
-
     int firstElement,
-
     int lastElement
-
-)`
+)
+```
 
 &nbsp;
 
