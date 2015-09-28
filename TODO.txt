@@ -1,0 +1,26 @@
+Use this file as a way to keep track of what we need to do. Note that
+github supports the feature of issues to do this, but I sometimes find
+this more convenient. It can be worth it to change both this file and 
+add an issue on the matter, be it bug, task, or feature.
+
+
+Bugs: (This is essentially for remembering any bugs you had when you
+	last left, or if you're stuck and need help.)
+# : name(if any) : status ("I got it" or "I NEED HEEEELP")
+	description of fault
+	:
+	potential sources
+Or you can just type them in any format. I honestly don't care, but any
+added order can be nice.
+
+Tasks:
+# : name : status : assigned to
+	description
+Or you can just type them in any format. I honestly don't care, but any
+added order can be nice.
+
+
+Again, github supports a lot of these things. Normally I just handle my
+TODO locally, but since we are working together it might be beneficial
+to use it together, or to use github. If we do end up sharing this file
+back and forth, be aware that there will be A LOT of merge clashing.
