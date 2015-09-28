@@ -1,0 +1,36 @@
+Concept:
+One "control" process (main), will fork each successive row of processes
+executing each synchornously. Once the current row is done, the control
+will begin the next row.
+
+Main structure:
+	Read Input Nodes
+	Build Graph
+	Run BFS on graph to detect loops
+	(Also build "Row List")
+	while there are more rows
+		fork this row
+		if child
+			exec
+		if parent
+			wait for row
+	clean up memory
+	
+File Outline: (This is not UML, even though I wish it was.)
+(given) redirect.c
+IO.c/h
+	- getLineData/read(Next|Input)Node(s)
+	- deal with redirect.c
+graph.c/h
+	- Node (Array of children):apparently this was already specified in
+			the requirements.
+	- BFS
+	(below might be in different file(s) rowlist.c/h)
+	- Row list
+	- Build Row list
+		-This is just a 2D array of the processes.
+graphexec.c/h
+	- main
+(test stuff)
+... I don't know ... pa1-release seemed to have tests.
+
