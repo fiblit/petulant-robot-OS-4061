@@ -1,5 +1,6 @@
 #include "IO.h"
 
+/* Turns a string (line) into a node */
 node_t readNode( char *line ){
 		node_t nod;
 		char **arg;
@@ -17,4 +18,15 @@ node_t readNode( char *line ){
 		}		
 		
 		return nod;
+}
+
+/* Returns a line from the file in */
+char *getLine( FILE *in, int buf ){
+	char c;
+	char line[ buf ];
+	int i;
+	for (i = 0; (i < buf - 1) && ((c = getc(in)) != EOF) && (c != '\n'); i++ )
+		line[ i ] = c;
+	line [ i ] = '\0';
+	return line;
 }
