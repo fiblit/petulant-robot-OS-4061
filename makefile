@@ -6,7 +6,7 @@ graphexec: graphexec.o IO.o graph.o
 
 graphexec.o: graphexec.c graphexec.h
 	gcc -c graphexec.c
-IO.o: IO.c IO.h
+IO.o: IO.c IO.h makeargv.h graph.h
 	gcc -c IO.c
 graph.o: graph.c graph.h
 	gcc -c graph.c
