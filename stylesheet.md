@@ -98,7 +98,7 @@ The only "exception" is commented out code.
 &nbsp;
 
 ### Functions/Classes ###
-One argument per line in the header of a function.
+One argument per line in the header of a function, for large argument functions. 
 
 Example:
 
@@ -108,6 +108,16 @@ public void InsertionSort(
     int firstElement,
     int lastElement
 )
+```
+
+&nbsp;
+
+For a small amount write the arguments on the same line.
+
+Example:
+
+```
+public void InsertionSort( SortArray data, int firstElement, int lastElement )
 ```
 
 &nbsp;
