@@ -4,6 +4,7 @@
 #include "stdlib.h"
 #include "unistd.h"
 #include "sys/types.h"
+#include <stdio.h>
 
 //I feel like using an enum is a better idea but whatevs.
 #define INELIGIBLE 0

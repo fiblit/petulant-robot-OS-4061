@@ -17,7 +17,11 @@ rowlist_t buildRowList( node_t nodes[], int len ){
 	 * 			-1 remaining
 	 * 			add to rowlist at row "depth". 
 	 */
-	//Setup
+	//Setup	
+	printf( "test2" );
+	for (int i = 0; i < len; i++){
+		nodes[ i ].num_parents = 0;
+	}
 	for (int i = 0; i < len; i++){//for each node
 		for (int j = 0; j < 10; j++){//for each of their children
 			if (nodes[ i ].children[ j ] == -1){
@@ -26,9 +30,12 @@ rowlist_t buildRowList( node_t nodes[], int len ){
 			nodes[ nodes[ i ].children[ j ] ].num_parents++;
 		}
 	}
+	printf( "test1" );
 	rowlist_t rowlist;
-	for (int i = 0; i < 50; i++){
-		rowlist[ i ] = malloc ( sizeof(node_t) * 50 );//way overallocating
+	rowlist = (rowlist_t) malloc( sizeof( node_t * ) * len);
+	//rowlist[0] = (node_t *) malloc( sizeof( node_t ) * len);
+	for (int i = 0; i < len; i++){
+		rowlist[ i ] = (node_t *) malloc ( sizeof(node_t) * len );//way overallocating
 	}
 	node_t active[ len ];//so I can swap things around while still have children refs
 	for (int i = 0; i < len; i++){

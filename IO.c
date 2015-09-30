@@ -12,13 +12,17 @@ node_t readNode( char *line ){
 		
 		char **childt;
 		int nchild = makeargv( arg[ 1 ], " ", &childt );
-		if ( strcmp( childt[ 0 ], "none") ){
+		if ( strcmp( childt[ 0 ], "none") == 0 ){
 			nod.children[ 0 ] = -1;
 			nod.num_children = 0;
 		}		
 		else{
-			for (int i = 0; i < nchild; i++){
+			int i;
+			for (i = 0; i < nchild; i++){
 				nod.children [ i ] = atoi( childt[ i ] );
+			}
+			if (nchild < 10){
+				nod.children[ i ] = -1;
 			}
 			nod.num_children = nchild;
 		}
