@@ -62,6 +62,5 @@ rowlist_t buildRowList( node_t nodes[], int len ){
 			rowlist[ active[ i ].temp ]++;
 		}
 	}
-	free(active);
 	return rowlist;
 }
