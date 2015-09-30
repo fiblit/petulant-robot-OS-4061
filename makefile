@@ -5,11 +5,11 @@ graphexec: graphexec.o IO.o graph.o
 	gcc graphexec.o IO.o graph.o -o graphexec
 
 graphexec.o: graphexec.c graphexec.h
-	gcc -c graphexec.c
+	gcc -std=c99 -c graphexec.c
 IO.o: IO.c IO.h makeargv.h graph.h
-	gcc -c IO.c
+	gcc -std=c99 -c IO.c
 graph.o: graph.c graph.h
-	gcc -c graph.c
+	gcc -std=c99 -c graph.c
 
 #I usually like having a bin and obj folder, but this project is so small that it can be added it later.
 #obj/:
