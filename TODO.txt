@@ -3,21 +3,41 @@ github supports the feature of issues to do this, but I sometimes find
 this more convenient. It can be worth it to change both this file and 
 add an issue on the matter, be it bug, task, or feature.
 
-
 Bugs: (This is essentially for remembering any bugs you had when you
 	last left, or if you're stuck and need help.)
 # : name(if any) : status ("I got it" or "I NEED HEEEELP")
 	description of fault
 	:
 	potential sources
+	:
+	potential solutions
 Or you can just type them in any format. I honestly don't care, but any
 added order can be nice.
+3 : buildRowList builds "empty" rowlist : Dalton : No help needed
+	Essentially the children are lost and point to invalid locations when the program runs.
+	(As far as I know at least, the bug might be worse and deeper than I currently expect.)
+	:
+	I plan on fixing it by using a linked list (of pointers to nodes) to maintain the
+	"remaining" nodes. I won't be swapping them with the end of the array and decrementing
+	rem. This way I can keep track of each of the nodes using the children array.
+	The linked list will be going into graph.c/h
 
 Tasks:
 # : name : status : assigned to
 	description
 Or you can just type them in any format. I honestly don't care, but any
 added order can be nice.
+
+4 : Add BFS/Loop detect : low priority : Dalton
+	There will be a slightly modified form of BFS to ensure that there are no cycles in the
+	input graph. This is nessecary for the construction of the row list.
+
+5 : Main Functionality : high priority : Tim...?
+	Some things main will include:
+	-Reading file into nodes buffer/array
+	-Process fan over the current row of the row list.
+	-Exec each node in that row.
+	-The control process (main) will wait all of the nodes in the row (needs the r_wait function)
 
 
 Again, github supports a lot of these things. Normally I just handle my
