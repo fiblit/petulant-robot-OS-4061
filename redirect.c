@@ -2,8 +2,8 @@
 * This won't compile, of course, but you can use this code
 * in your program to perform the file redirection.
 * ....
-* if you are the process responsible for running the 
-* command line argument, e.g., 
+* if you are the process responsible for running the
+* command line argument, e.g.,
 * echo hi there:1:blank-file.txt:1echo1.out
 * then you'll need to redirect the input and output files
 * to STDIN and STDOUT with the following code...
@@ -31,6 +31,6 @@ if (output_file < 0){
 }
 
 /* .....
-* using makeargv, parse the program arguments and give to 
+* using makeargv, parse the program arguments and give to
 * execvp to run....
 */

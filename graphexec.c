@@ -12,6 +12,7 @@ int main(int argc, char *argv[])
 	for ( int i = 0; i < rowList.size(); i++ ){
 		fan ( rowList[i].size() )
 		if childpid == 0
+			redirect (nodeij.files)
 			exec (nodeij.prog)
 		else
 			while (r_wait > 0)
@@ -20,7 +21,7 @@ int main(int argc, char *argv[])
 	*/
 
 	//Dalton's test code below
-
+	/*
 	node_t ns[ 5 ];
 	ns[ 0 ] = readNode("ls -a:1 3:blank-file.txt:blank-out.txt");
 	ns[ 1 ] = readNode("ls -a:2 4:blank-file.txt:blank-out.txt");
@@ -52,10 +53,10 @@ int main(int argc, char *argv[])
 				printf("%dth child: %d\n", i, rl[ i ][ j ].children[ i ]);
 			}
 		}
-	}
+	} */
 
 	//Tim's test code below
-	/*
+
 	node_t testNode[ 5 ];
 	testNode[ 0 ] = readNode("ls -a:1:blank-file.txt:blank-out.txt");
 	testNode[ 1 ] = readNode("echo hi hi:2:blank-file.txt:blank-out.txt");
@@ -78,16 +79,15 @@ int main(int argc, char *argv[])
 		}
 
 		if ( testchildpid == 0 ) {  //child will perform
-			execvp( testNode[ 0 ].prog, testNodeArgs );
+			execvp( testNodeArgs[0], &testNodeArgs[0] );
 			perror("Child failed to execvp the command");
 			return 1;
 		}
-
 		if ( testchildpid != wait(NULL) ) {
 			perror("Parent failed to wait");
 			return 1;
 		}
-	} */
+	}
 
 	return 0;
 }
