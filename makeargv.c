@@ -1,5 +1,7 @@
 #include "makeargv.h"
 
+/* Code below taken from pg. 37 of R&R book  */
+
 int makeargv(const char *s, const char *delimiters, char ***argvp){
 
 	int error;
@@ -11,10 +13,10 @@ int makeargv(const char *s, const char *delimiters, char ***argvp){
 	if ((s == NULL) || (delimiters == NULL) || (argvp == NULL)){
 
 		errno = EINVAL;
-		return -1;	
+		return -1;
 
 	}
-	
+
 	*argvp = NULL; // already assigned as a new var, just blanking out
 
 	snew = s + strspn(s, delimiters);

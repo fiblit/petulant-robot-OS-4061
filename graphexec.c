@@ -8,7 +8,7 @@ int main(int argc, char *argv[])
 		getNode(line);
 	//buildGraph(Nodes); //not needed...
 	bfs/detectLoops(nodes);
-	buildRowList(nodes); 
+	buildRowList(nodes);
 	for ( int i = 0; i < rowList.size(); i++ ){
 		fan ( rowList[i].size() )
 		if childpid == 0
@@ -18,6 +18,9 @@ int main(int argc, char *argv[])
 	}
 	free rowlist
 	*/
+
+	//Dalton's test code below
+
 	node_t ns[ 5 ];
 	ns[ 0 ] = readNode("ls -a:1 3:blank-file.txt:blank-out.txt");
 	ns[ 1 ] = readNode("ls -a:2 4:blank-file.txt:blank-out.txt");
@@ -36,7 +39,7 @@ int main(int argc, char *argv[])
 		}
 		printf( "test4\n" );
 	}
-	
+
 	printf( "test3" );
 	rowlist_t rl = buildRowList( ns, 5 );
 	for (int i = 0; i < 5; i++){
@@ -50,6 +53,41 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
-	
+
+	//Tim's test code below
+	/*
+	node_t testNode[ 5 ];
+	testNode[ 0 ] = readNode("ls -a:1:blank-file.txt:blank-out.txt");
+	testNode[ 1 ] = readNode("echo hi hi:2:blank-file.txt:blank-out.txt");
+	testNode[ 2 ] = readNode("echo toodles:none:blank-file.txt:blank-out.txt");
+
+	testNode[ 0 ].status = READY;
+
+	pid_t testchildpid;
+
+	char **testNodeArgs;
+	makeargv(testNode[ 0 ].prog, " ", &testNodeArgs);
+
+	printf("%s \n", testNode[ 0 ].prog );
+
+	if ( testNode[ 0 ].status == READY ) {
+		testchildpid = fork();
+		if ( testchildpid == -1 ) {
+			perror("failed to fork");
+			return 1;
+		}
+
+		if ( testchildpid == 0 ) {  //child will perform
+			execvp( testNode[ 0 ].prog, testNodeArgs );
+			perror("Child failed to execvp the command");
+			return 1;
+		}
+
+		if ( testchildpid != wait(NULL) ) {
+			perror("Parent failed to wait");
+			return 1;
+		}
+	} */
+
 	return 0;
 }
