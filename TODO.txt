@@ -14,11 +14,6 @@ Bugs: (This is essentially for remembering any bugs you had when you
 Or you can just type them in any format. I honestly don't care, but any
 added order can be nice.
 
-7 : buildRowList builds in wrong order : Dalton
-	That was anticlimactic...
-	Okay. It nearly worked. I traced through my debug output more, and it's
-	still not quite right. I do not know why it is broken.
-
 Tasks:
 # : name : status : assigned to
 	description
