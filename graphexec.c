@@ -37,6 +37,10 @@ int main(int argc, char *argv[])
 	}
     
 	rowlist_t rl = buildRowList( ns, 5 );
+    for (int j = 0; j < 5; j++){
+		printf("\n%dth node\n", j);
+		printf("numparents: %d", ns[ j ]->num_parents);
+	}
 	for (int i = 0; i < 5; i++){
 		printf("\n%dth row\n", i);
 		for (int j = 0; j < 5; j++){

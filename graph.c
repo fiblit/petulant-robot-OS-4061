@@ -8,16 +8,13 @@ rowlist_t buildRowList( node_t *(nodes[]), int len ){
     /*
     for each node
         tell kids + 1 parent
-    while nodes remain
-        for each remaining node
-            if has parent
-                increment depth/row
+    for each row
         for each remaining node
             if has no parent
-                tell kids -1 parent
-                swap with end of remaining
-                rem - 1
-                add to rowlist at row "depth".
+                add to orphans
+        for each orphan
+            tell kids -1 parent
+            add to this row
     */
     //setup
     for (int i = 0; i < len; i++){
@@ -28,9 +25,9 @@ rowlist_t buildRowList( node_t *(nodes[]), int len ){
             nodes[ nodes[ i ]->children[ j ] ]->num_parents++;
         }
     }
-    int active[ len ];
+    int remain[ len ];
     for (int i = 0; i < len; i++){
-        active[ i ] = i;
+        remain[ i ] = i;
     }
     rowlist_t rl;
     rl = (rowlist_t) malloc( sizeof( node_t ** ) * len);
@@ -43,6 +40,34 @@ rowlist_t buildRowList( node_t *(nodes[]), int len ){
         }
     }
     
+    //Build
+    for (int row = 0, rem = len; row < len && rem > 0; row++){
+        int numOrphans = 0;
+        int orphans[ len ];
+        for (int i = 0; i < len; i++){
+            orphans[ i ] = -1;
+        }
+        
+        for (int i = 0; i < rem; i++){
+            if ( nodes[ remain[ i ] ]->num_parents == 0 ){
+                orphans[ numOrphans++ ] = remain[ i ];
+                int t = remain[ i ];
+                remain[ i ] = remain[ rem - 1 ];
+                remain[ rem - 1 ] = t;
+                rem--;
+            }
+        }
+        int col = 0;
+        for (int i = 0; i < numOrphans; i++){
+            for (int j = 0; j < len; j++){
+                if (nodes[ orphans[ i ] ]->children[ j ] == -1){
+                    break;
+                }
+                nodes[ nodes[ orphans[ i ] ]->children[ j ] ]->num_parents--;
+            }
+            rl [ row ][ col++ ] = nodes[ orphans[ i ] ];
+        }
+    }
     /*
     //Build
     for (int row = 0, rem = len; row < len; row++){
@@ -79,7 +104,7 @@ rowlist_t buildRowList( node_t nodes[], int len ){
 	 * 			tell kids -1 parent
 	 * 			swap with end of remaining
 	 * 			-1 remaining
-	 * 			add to rowlist at row "depth". 
+	 * 			add to rowlist at row "depth".
 	 *
 	//Setup	
 	for (int i = 0; i < len; i++){
@@ -128,7 +153,7 @@ rowlist_t buildRowList( node_t nodes[], int len ){
                 active[ i ] = active[ rem-1 ];
                 active[ rem-1 ] = t;
                 rem--;
-                *rowlist[ nodes[ active[ i ] ].temp ] = nodes[ active[ rem ] ];   
+                *rowlist[ nodes[ active[ i ] ].temp ] = nodes[ active[ rem ] ];
                 rowlist[ nodes[ active[ i ] ].temp ]++;
             }
         }
