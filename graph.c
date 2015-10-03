@@ -5,23 +5,10 @@
  * Requires that there be no cycles in the graph 
  */
 rowlist_t buildRowList( node_t *(nodes[]), int len ){
-    /*
-    for each node
-        tell kids +1 parent
-    for each row
-        for each remaining node
-            if has no parent
-                add to orphans
-        for each orphan
-            tell kids -1 parent
-            add to this row
-    */
-    //setup
+    
+    //Setup
     for (int i = 0; i < len; i++){
-        for (int j = 0; j < len; j ++){
-            if (nodes[ i ]->children[ j ] == -1){
-                break;
-            }
+        for (int j = 0; j < nodes[ i ]->num_children; j ++){
             nodes[ nodes[ i ]->children[ j ] ]->num_parents++;
         }
     }
@@ -48,21 +35,19 @@ rowlist_t buildRowList( node_t *(nodes[]), int len ){
             orphans[ i ] = -1;
         }
         
-        for (int i = 0; i < rem; i++){
+        for (int i = rem - 1; i < rem && i >= 0; i--){
             if ( nodes[ remain[ i ] ]->num_parents == 0 ){
                 orphans[ numOrphans++ ] = remain[ i ];
                 int t = remain[ i ];
                 remain[ i ] = remain[ rem - 1 ];
                 remain[ rem - 1 ] = t;
                 rem--;
+                //i--;
             }
         }
         int col = 0;
         for (int i = 0; i < numOrphans; i++){
-            for (int j = 0; j < len; j++){
-                if (nodes[ orphans[ i ] ]->children[ j ] == -1){
-                    break;
-                }
+            for (int j = 0; j < nodes[ orphans [ i ] ]->num_children; j++){
                 nodes[ nodes[ orphans[ i ] ]->children[ j ] ]->num_parents--;
             }
             rl [ row ][ col++ ] = nodes[ orphans[ i ] ];

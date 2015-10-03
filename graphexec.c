@@ -37,22 +37,18 @@ int main(int argc, char *argv[])
 	}
     
 	rowlist_t rl = buildRowList( ns, 5 );
-    for (int j = 0; j < 5; j++){
-		printf("\n%dth node\n", j);
-		printf("numparents: %d", ns[ j ]->num_parents);
-	}
 	for (int i = 0; i < 5; i++){
-		printf("\n%dth row\n", i);
+		printf("\n\n%dth row\n", i);
 		for (int j = 0; j < 5; j++){
             if (rl[ i ][ j ]==NULL){
-                printf("NULL - i: %d, j: %d", i, j);
+                printf("\nNULL - i: %d, j: %d\n", i, j);
                 break;
             }
 			printf("\n%dth node\n", j);
 			printf("prog: %s\ninput: %s\noutput %s\n", rl[ i ][ j ]->prog, rl[ i ][ j ]->input, rl[ i ][ j ]->output);
 			printf("numkids: %d\n", rl[ i ][ j ]->num_children);
-			for (int i = 0; i < rl[ i ][ j ]->num_children; i++){
-				printf("%dth child: %d\n", i, rl[ i ][ j ]->children[ i ]);
+			for (int k = 0; k < rl[ i ][ j ]->num_children; k++){
+				printf("%dth child: %d\n", i, rl[ i ][ j ]->children[ k ]);
 			}
 		}
 	}
