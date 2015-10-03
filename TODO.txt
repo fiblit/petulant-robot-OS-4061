@@ -13,14 +13,6 @@ Bugs: (This is essentially for remembering any bugs you had when you
 	potential solutions
 Or you can just type them in any format. I honestly don't care, but any
 added order can be nice.
-3 : buildRowList builds "empty" rowlist : Dalton : No help needed
-	Essentially the children are lost and point to invalid locations when the program runs.
-	(As far as I know at least, the bug might be worse and deeper than I currently expect.)
-	:
-	I plan on fixing it by using a linked list (of pointers to nodes) to maintain the
-	"remaining" nodes. I won't be swapping them with the end of the array and decrementing
-	rem. This way I can keep track of each of the nodes using the children array.
-	The linked list will be going into graph.c/h
 
 Tasks:
 # : name : status : assigned to
