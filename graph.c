@@ -4,63 +4,54 @@
  * Builds the "rowlist" data structure from the graph nodes
  * Requires that there be no cycles in the graph 
  */
-rowlist_t buildRowList( node_t nodes[], int len ){	
-	/*
-	 *	for each node
-	 * 		tell kdis +1 parent
-	 *	for each remaining node
-	 * 		if has parent
-	 * 			incrememnt depth/row
-	 * 		else
-	 * 			tell kids -1 parent
-	 * 			swap with end of remaining
-	 * 			-1 remaining
-	 * 			add to rowlist at row "depth". 
-	 */
-	//Setup	
-	printf( "test2" );
-	for (int i = 0; i < len; i++){
-		nodes[ i ].num_parents = 0;
-	}
-	for (int i = 0; i < len; i++){//for each node
-		for (int j = 0; j < 10; j++){//for each of their children
-			if (nodes[ i ].children[ j ] == -1){
-				break;
-			}
-			nodes[ nodes[ i ].children[ j ] ].num_parents++;
-		}
-	}
-	printf( "test1" );
-	rowlist_t rowlist;
-	rowlist = (rowlist_t) malloc( sizeof( node_t * ) * len);
-	//rowlist[0] = (node_t *) malloc( sizeof( node_t ) * len);
-	for (int i = 0; i < len; i++){
-		rowlist[ i ] = (node_t *) malloc ( sizeof(node_t) * len );//way overallocating
-	}
-	node_t active[ len ];//so I can swap things around while still have children refs
-	for (int i = 0; i < len; i++){
-		active[ i ] = nodes[ i ];
-	}
-	
-	//Build rowlist
-	for (int i = 0, rem = len - 1; i < rem; i++){
-		if (nodes[ i ].num_parents > 0){//has parents
-			active[ i ].temp++;//temp in this case means depth/row
-		}
-		else{
-			for (int j = 0; j < 10; j++){
-				if (nodes[ i ].children[ j ] == -1){
-					break;
-				}
-				nodes[ active[ i ].children[ j ] ].num_parents--;
-			}
-			node_t t = active[ i ];
-			active[ i ] = active[ rem ];
-			active[ rem ] = t;
-			rem--;
-			*rowlist[ active[ i ].temp ] = active[ rem ];   
-			rowlist[ active[ i ].temp ]++;
-		}
-	}
-	return rowlist;
+rowlist_t buildRowList( node_t *(nodes[]), int len ){
+    
+    //Setup
+    for (int i = 0; i < len; i++){
+        for (int j = 0; j < nodes[ i ]->num_children; j ++){
+            nodes[ nodes[ i ]->children[ j ] ]->num_parents++;
+        }
+    }
+    int remain[ len ];
+    for (int i = 0; i < len; i++){
+        remain[ i ] = i;
+    }
+    rowlist_t rl;
+    rl = (rowlist_t) malloc( sizeof( node_t ** ) * len);
+    for (int i = 0; i < len; i++){
+        rl[ i ] = (node_t **) malloc( sizeof(node_t *) * len);
+    }
+    for (int i = 0; i < len; i++){
+        for (int j = 0; j < len; j++){
+            rl[ i ][ j ] = NULL;
+        }
+    }
+    
+    //Build
+    for (int row = 0, rem = len; row < len && rem > 0; row++){
+        int numOrphans = 0;
+        int orphans[ len ];
+        for (int i = 0; i < len; i++){
+            orphans[ i ] = -1;
+        }
+        
+        for (int i = rem - 1; i < rem && i >= 0; i--){
+            if ( nodes[ remain[ i ] ]->num_parents == 0 ){
+                orphans[ numOrphans++ ] = remain[ i ];
+                int t = remain[ i ];
+                remain[ i ] = remain[ rem - 1 ];
+                remain[ rem - 1 ] = t;
+                rem--;
+                //i--;
+            }
+        }
+        int col = 0;
+        for (int i = 0; i < numOrphans; i++){
+            for (int j = 0; j < nodes[ orphans [ i ] ]->num_children; j++){
+                nodes[ nodes[ orphans[ i ] ]->children[ j ] ]->num_parents--;
+            }
+            rl [ row ][ col++ ] = nodes[ orphans[ i ] ];
+        }
+    }
+    return rl;
 }

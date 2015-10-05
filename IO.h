@@ -6,7 +6,7 @@
 #include "makeargv.h"
 #include "graph.h"
 
-node_t readNode( char *line );
+node_t *readNode( char *line );
 
 char *getLine( FILE *in, int buf );
 

@@ -28,8 +28,8 @@ typedef struct node {
 //potentially could have "int detectLoop(..."
 void BFS( node_t nodes[] );//For detecting loops
 
-typedef node_t** rowlist_t;
+typedef node_t*** rowlist_t;//2d array of node_t pointers
 
-rowlist_t buildRowList( node_t nodes[], int len );
+rowlist_t buildRowList( node_t *(nodes[]), int len );
 
 #endif
