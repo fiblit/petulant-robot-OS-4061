@@ -59,21 +59,21 @@ int main(int argc, char *argv[])
 
 	//Tim's test code below
 
-	node_t testNode[ 5 ];
+	node_t *(testNode[ 5 ]);
 	testNode[ 0 ] = readNode("ls -a:1:blank-file.txt:blank-out.txt");
 	testNode[ 1 ] = readNode("echo hi hi:2:blank-file.txt:blank-out.txt");
 	testNode[ 2 ] = readNode("echo toodles:none:blank-file.txt:blank-out.txt");
 
-	testNode[ 0 ].status = READY;
+	testNode[ 0 ]->status = READY;
 
 	pid_t testchildpid;
 
 	char **testNodeArgs;
-	makeargv(testNode[ 0 ].prog, " ", &testNodeArgs);
+	makeargv(testNode[ 0 ]->prog, " ", &testNodeArgs);
 
-	printf("%s \n", testNode[ 0 ].prog );
+	printf("%s \n", testNode[ 0 ]->prog );
 
-	if ( testNode[ 0 ].status == READY ) {
+	if ( testNode[ 0 ]->status == READY ) {
 		testchildpid = fork();
 		if ( testchildpid == -1 ) {
 			perror("failed to fork");
