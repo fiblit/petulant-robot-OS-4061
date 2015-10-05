@@ -58,7 +58,7 @@ int main(int argc, char *argv[])
 	} */
 
 	//Tim's test code below
-
+	/*
 	node_t *(testNode[ 5 ]);
 	testNode[ 0 ] = readNode("ls -a:1:blank-file.txt:blank-out.txt");
 	testNode[ 1 ] = readNode("echo hi hi:2:blank-file.txt:blank-out.txt");
@@ -89,7 +89,37 @@ int main(int argc, char *argv[])
 			perror("Parent failed to wait");
 			return 1;
 		}
+	} */
+
+	//making sure there are correct # of arguments
+	if ( argc != 2 ) {
+		fprintf ( stderr, "Usage %s some-graph-file.txt \n", argv[0] );
+		return 1;
 	}
+
+	//opening the given graph file in "r" read mode
+	FILE  *graphFile = fopen( argv[1] , "r" ) ;
+
+	//error check that it opened a file
+	if (graphFile == NULL) { //file failed to open
+		perror ( "Failed to open file" );
+		return 1;
+	}
+
+	char line[ 1024 ]; //max length of a line
+	node_t *bobTest;
+
+	//this while loop will read all the lines of the file until it the file is complete
+	while ( fgets( line, 1024, graphFile ) != NULL ) {
+		bobTest = readNode( line );
+		printf("bobTest stuff: %d \n", bobTest->num_children);
+	}
+
+	//detectLoops function should be here
+
+	//buildRowList from our group of nodes here
+
+	//then execution loop
 
 	return 0;
 }
