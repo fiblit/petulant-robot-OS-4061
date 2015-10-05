@@ -107,16 +107,21 @@ int main(int argc, char *argv[])
 	}
 
 	char line[ 1024 ]; //max length of a line
-	node_t *bobTest;
+	node_t *bobTest[50] ; //50 max amt of lines/nodes 
+	int fileLineCount = 0;
 
+	//code below causing a seg fault atm, will fix after night class
 	//this while loop will read all the lines of the file until it the file is complete
 	while ( fgets( line, 1024, graphFile ) != NULL ) {
-		bobTest = readNode( line );
-		printf("bobTest stuff: %d \n", bobTest->num_children);
+		bobTest[fileLineCount] = readNode( line );
+		fileLineCount++;  //increment fileLineCount
+		printf("bobTest stuff: %d \n", bobTest[fileLineCount]->num_children);
+		printf("fileLineCount: %d \n", fileLineCount);
 	}
 
 	//detectLoops function should be here
 
+	//buildRowList()
 	//buildRowList from our group of nodes here
 
 	//then execution loop
