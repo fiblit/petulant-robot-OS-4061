@@ -21,15 +21,8 @@ int main(int argc, char *argv[])
 	*/
 
 	//Dalton's test code below
-<<<<<<< HEAD
 	/*
-	node_t ns[ 5 ];
-	ns[ 0 ] = readNode("ls -a:1 3:blank-file.txt:blank-out.txt");
-	ns[ 1 ] = readNode("ls -a:2 4:blank-file.txt:blank-out.txt");
-	ns[ 2 ] = readNode("ls -a:4:blank-file.txt:blank-out.txt");
-	ns[ 3 ] = readNode("ls -a:4:blank-file.txt:blank-out.txt");
-	ns[ 4 ] = readNode("ls -a:none:blank-file.txt:blank-out.txt");
-=======
+
 
 	node_t *(ns[ 5 ]);
 	ns[ 0 ] = readNode("echo 1:1 3:blank-file.txt:blank-out.txt");
@@ -37,7 +30,7 @@ int main(int argc, char *argv[])
 	ns[ 2 ] = readNode("echo 3:4:blank-file.txt:blank-out.txt");
 	ns[ 3 ] = readNode("echo 4:4:blank-file.txt:blank-out.txt");
 	ns[ 4 ] = readNode("echo 5:none:blank-file.txt:blank-out.txt");
->>>>>>> 36aae28be2e3e262faaf3c77ae36c16c3488d800
+
 	for (int j = 0; j < 5; j++){
 		printf("\n%dth node\n", j);
 		printf("prog: %s\ninput: %s\noutput %s\n", ns[ j ]->prog, ns[ j ]->input, ns[ j ]->output);
@@ -46,7 +39,7 @@ int main(int argc, char *argv[])
 			printf("%dth child: %d\n", i, ns[ j ]->children[ i ]);
 		}
 	}
-    
+
 	rowlist_t rl = buildRowList( ns, 5 );
 	for (int i = 0; i < 5; i++){
 		printf("\n\n%dth row\n", i);
@@ -62,13 +55,8 @@ int main(int argc, char *argv[])
 				printf("%dth child: %d\n", i, rl[ i ][ j ]->children[ k ]);
 			}
 		}
-<<<<<<< HEAD
 	} */
 
-=======
-	}
-    
->>>>>>> 36aae28be2e3e262faaf3c77ae36c16c3488d800
 	//Tim's test code below
 
 	node_t testNode[ 5 ];
