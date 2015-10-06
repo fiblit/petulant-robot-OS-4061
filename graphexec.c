@@ -107,16 +107,24 @@ int main(int argc, char *argv[])
 	}
 
 	char line[ 1024 ]; //max length of a line
-	node_t *bobTest[50] ; //50 max amt of lines/nodes 
+	node_t *(nodes[50]) ; //50 max amt of lines/nodes
 	int fileLineCount = 0;
 
 	//code below causing a seg fault atm, will fix after night class
 	//this while loop will read all the lines of the file until it the file is complete
-	while ( fgets( line, 1024, graphFile ) != NULL ) {
-		bobTest[fileLineCount] = readNode( line );
-		fileLineCount++;  //increment fileLineCount
-		printf("bobTest stuff: %d \n", bobTest[fileLineCount]->num_children);
+	while ( fgets( line, 1024, graphFile ) != NULL && fileLineCount < 50 ) {
+		nodes[fileLineCount] = readNode( line );
+		printf("nodes stuff: %d \n", nodes[fileLineCount]->num_children);
 		printf("fileLineCount: %d \n", fileLineCount);
+		fileLineCount++;  //increment fileLineCount
+	}
+	for (int j = 0; j < 5; j++){
+		printf("\n%dth node\n", j);
+		printf("prog: %s\ninput: %s\noutput %s\n", nodes[ j ]->prog, nodes[ j ]->input, nodes[ j ]->output);
+		printf("numkids: %d\n", nodes[ j ]->num_children);
+		for (int i = 0; i < nodes[ j ]->num_children; i++){
+			printf("%dth child: %d\n", i, nodes[ j ]->children[ i ]);
+		}
 	}
 
 	//detectLoops function should be here
