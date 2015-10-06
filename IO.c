@@ -43,3 +43,25 @@ char *getLine( FILE *in, int buf ){
 	line [ i ] = '\0';
 	return line;
 }
+
+
+void redirect(node_t *n){
+	int input_file = open(n->input, O_RDONLY);
+	if (input_file < 0){
+		perror("Error opening input file in child after fork! Exiting.");
+		exit(0);
+	} else {
+		dup2(input_file, STDIN_FILENO);
+		close(input_file);
+	}
+
+	int output_file = open(n->output, O_WRONLY|O_CREAT|O_TRUNC, 0644);
+
+	if (output_file < 0){
+		perror("Error opening output file in child after fork! Exiting.");
+		exit(0);
+	} else{
+		dup2(output_file, STDOUT_FILENO);
+		close(output_file);
+	}
+}
