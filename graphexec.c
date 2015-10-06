@@ -98,7 +98,7 @@ int main(int argc, char *argv[])
 	}
 
 	//opening the given graph file in "r" read mode
-	FILE  *graphFile = fopen( argv[1] , "r" ) ;
+	FILE  *graphFile = fopen( argv[1] , "r" );
 
 	//error check that it opened a file
 	if (graphFile == NULL) { //file failed to open
@@ -107,30 +107,60 @@ int main(int argc, char *argv[])
 	}
 
 	char line[ 1024 ]; //max length of a line
-	node_t *(nodes[50]) ; //50 max amt of lines/nodes
+	node_t *(nodes[ 50 ]); //50 max amt of lines/nodes
 	int fileLineCount = 0;
 
 	//code below causing a seg fault atm, will fix after night class
 	//this while loop will read all the lines of the file until it the file is complete
 	while ( fgets( line, 1024, graphFile ) != NULL && fileLineCount < 50 ) {
 		nodes[fileLineCount] = readNode( line );
-		printf("nodes stuff: %d \n", nodes[fileLineCount]->num_children);
+		printf("nodes stuff: %d \n", nodes[ fileLineCount ]->num_children);
 		printf("fileLineCount: %d \n", fileLineCount);
 		fileLineCount++;  //increment fileLineCount
 	}
-	for (int j = 0; j < 5; j++){
-		printf("\n%dth node\n", j);
-		printf("prog: %s\ninput: %s\noutput %s\n", nodes[ j ]->prog, nodes[ j ]->input, nodes[ j ]->output);
-		printf("numkids: %d\n", nodes[ j ]->num_children);
-		for (int i = 0; i < nodes[ j ]->num_children; i++){
-			printf("%dth child: %d\n", i, nodes[ j ]->children[ i ]);
-		}
-	}
+
 
 	//detectLoops function should be here
 
+
+
 	//buildRowList()
 	//buildRowList from our group of nodes here
+	printf( "File line count : %d \n", fileLineCount );
+	rowlist_t rl = buildRowList ( nodes, fileLineCount );
+
+	for (int row = 0; row < fileLineCount; row++){
+		int numInRow;
+		for (int j = 0; j < fileLineCount; j++){
+            if (rl[ row ][ j ]==NULL){
+                numInRow++;
+                break;
+            }
+		}
+		int i;
+		for ( i = 0; i < numInRow; i++ ) {
+			if (( childpid == fork()) <= 0 ) { //fan creation
+				break;
+			}
+		}
+		if ( childpid == 0 ) {
+
+		}
+	}
+
+	/*
+	for ( int i = 0; i < rowList.size(); i++ ){
+		fan ( rowList[i].size() )
+		if childpid == 0
+			redirect (nodeij.files)
+			exec (nodeij.prog)
+		else
+			while (r_wait > 0)
+	*/
+
+
+
+
 
 	//then execution loop
 
