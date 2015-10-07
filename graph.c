@@ -45,13 +45,13 @@ rowlist_t buildRowList( node_t *(nodes[]), int len ){
             }
         }
 
-		if (numOrphans == 0){//cycle check!
-            for (int i = 0; i < len; i++){
-                free( rl[ i ] );
-			}
-			free( rl );
-			return NULL;
+	if (numOrphans == 0) { //cycle check!
+		for (int i = 0; i < len; i++) {
+                	free( rl[ i ] );
 		}
+         	free( rl );
+		return NULL;
+	}
 
         int col = 0;
         for (int i = 0; i < numOrphans; i++){

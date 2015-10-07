@@ -35,7 +35,7 @@ int main(int argc, char *argv[]){
 	rowlist_t rl = buildRowList ( nodes, fileLineCount );
 
 	if (rl == NULL){//there was a cycle
-        fprintf(stderr, "There was a cycle in the graph\n");
+        	fprintf(stderr, "There was a cycle in the graph\n");
 		return 1;
 	}
 
