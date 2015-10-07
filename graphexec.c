@@ -26,7 +26,7 @@ int main(int argc, char *argv[]){
 	while ( fgets( line, 1024, graphFile ) != NULL && fileLineCount < 50 ) {
 		node_t *n = readNode( line );
 		if (n != NULL){//blank line was read
-            nodes[ fileLineCount ] = n;
+            		nodes[ fileLineCount ] = n;
 		}
 		fileLineCount++;  //increment fileLineCount
 	}
@@ -42,7 +42,7 @@ int main(int argc, char *argv[]){
 	for (int row = 0; row < fileLineCount; row++){
 		int numInRow = 0;
 		for (int j = 0; j < fileLineCount; j++){
-    		if (rl[ row ][ j ]==NULL){
+    			if (rl[ row ][ j ]==NULL){
 				break;
 			}
 			numInRow++;
