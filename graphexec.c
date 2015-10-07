@@ -31,8 +31,9 @@ int main(int argc, char *argv[]){
 		node_t *n = readNode( line );
 		if (n != NULL){//blank line was read
 			nodes[ fileLineCount ] = n;
+			fileLineCount++;  //increment fileLineCount
 		}
-		fileLineCount++;  //increment fileLineCount
+		
 	}
 
 	//buildRowList from our group of nodes here
