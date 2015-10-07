@@ -28,10 +28,13 @@ example: % ./graphexec testgraph1.txt
 What Exactly graphexec Does
 --------------------------------------
 graphexec first reads nodes from the given text file (one per line), then builds
-a rowlist which determines which nodes are allowed to run. It then runs those
-nodes and moves on to the next row, which has the next nodes which are allowed
-to run. It does this until there are no more nodes available to run, and the
-program is finished.
+a "rowlist" which determines which nodes are allowed to run. It then runs those
+nodes row by row, where each row has the next nodes allowed to run. It does this
+until there are no more nodes available to run, and the program is finished.
+
+(A note on the "rowlist" data structure: It was meant to stand for "rows of lists"
+but is actually just a 2d array of pointers to nodes. Each row contains siblings
+in the graph.)
 
 x500s
 --------------------------------------
