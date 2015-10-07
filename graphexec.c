@@ -1,7 +1,7 @@
 #include "graphexec.h"
 
 int main(int argc, char *argv[]){
-    //node_t *n = readNode("");
+
 	//making sure there are correct # of arguments
 	if ( argc != 2 ) {
 		fprintf ( stderr, "Usage %s some-graph-file.txt \n", argv[0] );
@@ -28,8 +28,6 @@ int main(int argc, char *argv[]){
 		if (n != NULL){//blank line was read
             nodes[ fileLineCount ] = n;
 		}
-		printf("nodes stuff: %d \n", nodes[ fileLineCount ]->num_children);
-		printf("fileLineCount: %d \n", fileLineCount);
 		fileLineCount++;  //increment fileLineCount
 	}
 
@@ -37,8 +35,12 @@ int main(int argc, char *argv[]){
 
 	//buildRowList()
 	//buildRowList from our group of nodes here
-	printf( "File line count : %d \n", fileLineCount );
 	rowlist_t rl = buildRowList ( nodes, fileLineCount );
+
+	if (rl == NULL){//there was a cycle
+        fprintf(stderr, "There was a cycle in the graph\n");
+		return 1;
+	}
 
 	for (int row = 0; row < fileLineCount; row++){
 		int numInRow = 0;
@@ -52,7 +54,6 @@ int main(int argc, char *argv[]){
 		int i;
 		pid_t childpid;
 		for ( i = 0; i < numInRow; i++ ) {
-			fprintf(stderr, "row:%d col:%d\n", row, i);
 			if (( childpid = fork()) <= 0 ) { //fan creation
 				break;
 			}

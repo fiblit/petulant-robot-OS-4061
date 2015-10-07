@@ -32,26 +32,35 @@ rowlist_t buildRowList( node_t *(nodes[]), int len ){
         int numOrphans = 0;
         int orphans[ len ];
         for (int i = 0; i < len; i++){
-            orphans[ i ] = -1;
+            orphans[ i ] = -1;//-1 is a "null" termination character
         }
         
         for (int i = rem - 1; i < rem && i >= 0; i--){
-            if ( nodes[ remain[ i ] ]->num_parents == 0 ){
+            if (nodes[ remain[ i ] ]->num_parents == 0){
                 orphans[ numOrphans++ ] = remain[ i ];
                 int t = remain[ i ];
                 remain[ i ] = remain[ rem - 1 ];
                 remain[ rem - 1 ] = t;
                 rem--;
-                //i--;
             }
         }
+
+		if (numOrphans == 0){//cycle check!
+            for (int i = 0; i < len; i++){
+                free( rl[ i ] );
+			}
+			free( rl );
+			return NULL;
+		}
+
         int col = 0;
         for (int i = 0; i < numOrphans; i++){
-            for (int j = 0; j < nodes[ orphans [ i ] ]->num_children; j++){
+            for (int j = 0; j < nodes[ orphans[ i ] ]->num_children; j++){//"remove" nodes[ orphans[ i ] ]
                 nodes[ nodes[ orphans[ i ] ]->children[ j ] ]->num_parents--;
             }
-            rl [ row ][ col++ ] = nodes[ orphans[ i ] ];
+            rl[ row ][ col++ ] = nodes[ orphans[ i ] ];
         }
     }
     return rl;
 }
+
