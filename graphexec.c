@@ -63,17 +63,22 @@ int main(int argc, char *argv[]){
 			makeargv(rl[ row ][ i ]->prog, " ", &nodeArgs);
 			redirect( rl[ row ][ i ] );
 			execvp( nodeArgs[0], &nodeArgs[0] );
-			perror("Child failed to execvp the command");
+			perror("Child failed to execvp the command"); //execvp error check
 			return 1;
 		}
-		else if ( childpid == -1 ) {
+		else if ( childpid == -1 ) {  //fork() error check
 			perror( "fork failed to execute" );
 			return 1;
 		}
 		else {  //is parent
-			while ( r_wait( NULL ) > 0 ) {
-				; //Waiting for children
+			pid_t waitTestpid = r_wait ( NULL ); //waiting for children
+			if ( waitTestpid == -1 ) {
+				perror( "Parent failed to wait" );  //wait error check
 			}
+			/*while ( r_wait( NULL ) > 0 ) {
+				perror("Parent failed to wait"); //will reach if parent
+				return 1; //Waiting for children
+			} */
 		}
 	}
 
