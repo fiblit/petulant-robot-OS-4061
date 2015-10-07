@@ -10,9 +10,9 @@ node_t *readNode( char *line ){
 			return NULL;//no node to be read here!
 		}
 
-	    strcpy( nod->prog, arg[ 0 ] );
-	    strcpy( nod->input, arg[ 2 ] );
-	    strcpy( nod->output, arg[ 3 ] );
+	    	strcpy( nod->prog, arg[ 0 ] );
+	    	strcpy( nod->input, arg[ 2 ] );
+	    	strcpy( nod->output, arg[ 3 ] );
 
 		char **childt;
 		int nchild = makeargv( arg[ 1 ], " ", &childt );
@@ -30,10 +30,10 @@ node_t *readNode( char *line ){
 			}
 			nod->num_children = nchild;
 		}
-        nod->num_parents = 0;
-        nod->temp = 0;
-        nod->status = INELIGIBLE;
-        nod->pid = -1;
+        	nod->num_parents = 0;
+        	nod->temp = 0;
+        	nod->status = INELIGIBLE;
+        	nod->pid = -1;
 		return nod;
 }
 
