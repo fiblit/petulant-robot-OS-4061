@@ -25,9 +25,6 @@ typedef struct node {
 	pid_t pid; //track it when it's running
 } node_t;
 
-//potentially could have "int detectLoop(..."
-void BFS( node_t nodes[] );//For detecting loops
-
 typedef node_t*** rowlist_t;//2d array of node_t pointers
 
 rowlist_t buildRowList( node_t *(nodes[]), int len );
