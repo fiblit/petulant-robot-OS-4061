@@ -31,9 +31,6 @@ int main(int argc, char *argv[]){
 		fileLineCount++;  //increment fileLineCount
 	}
 
-	//TODO: add detectLoops here
-
-	//buildRowList()
 	//buildRowList from our group of nodes here
 	rowlist_t rl = buildRowList ( nodes, fileLineCount );
 
