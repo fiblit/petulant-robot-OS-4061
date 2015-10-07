@@ -91,6 +91,13 @@ int main(int argc, char *argv[])
 		}
 	} */
 
+	//node_t *n = readNode("echo 1 1:none:blank-file.txt:blank-out.txt");
+	//char** nodeArgs;
+	//makeargv(n->prog, " ", &nodeArgs);
+	//redirect(n);
+	//execvp(nodeArgs[0], &nodeArgs[0]);
+
+		
 	//making sure there are correct # of arguments
 	if ( argc != 2 ) {
 		fprintf ( stderr, "Usage %s some-graph-file.txt \n", argv[0] );
@@ -122,8 +129,6 @@ int main(int argc, char *argv[])
 
 	//detectLoops function should be here
 
-
-
 	//buildRowList()
 	//buildRowList from our group of nodes here
 	printf( "File line count : %d \n", fileLineCount );
@@ -141,15 +146,15 @@ int main(int argc, char *argv[])
 		int i;
 		pid_t childpid;
 		for ( i = 0; i < numInRow; i++ ) {
-			fprintf(stderr, "row: %d i: %d\n",row,i);
-			if (( childpid == fork()) <= 0 ) { //fan creation
+			fprintf(stderr,"row:%d col:%d\n",row,i);
+			if (( childpid = fork()) <= 0 ) { //fan creation
 				break;
 			}
 		}
 		if ( childpid == 0 ) {
-			redirect( rl[ row ][ i ] );
 			char **nodeArgs;
 			makeargv(rl[ row ][ i ]->prog, " ", &nodeArgs);
+			redirect( rl[ row ][ i ] );
 			execvp( nodeArgs[0], &nodeArgs[0] );
 			perror("Child failed to execvp the command");
 			return 1;
@@ -164,7 +169,7 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
-
+	
 	/*
 	for ( int i = 0; i < rowList.size(); i++ ){
 		fan ( rowList[i].size() )
