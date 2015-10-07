@@ -71,14 +71,14 @@ int main(int argc, char *argv[]){
 			return 1;
 		}
 		else {  //is parent
-			pid_t waitTestpid = r_wait ( NULL ); //waiting for children
-			if ( waitTestpid == -1 ) {
-				perror( "Parent failed to wait" );  //wait error check
+			pid_t w;
+			while( (w = r_wait( NULL )) > 0 ) { //waiting for children
+				;//do nothing
 			}
-			/*while ( r_wait( NULL ) > 0 ) {
-				perror("Parent failed to wait"); //will reach if parent
-				return 1; //Waiting for children
-			} */
+			if ( w == -1 ) {
+				perror( "Parent failed to wait" ); //wait error check
+				return 1;
+			}
 		}
 	}
 
