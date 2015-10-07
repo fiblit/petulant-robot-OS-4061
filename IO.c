@@ -1,16 +1,18 @@
 #include "IO.h"
 
-//TODO: add redirect.c code here. (turn into function)
-
 /* Turns a string (line) into a node */
 node_t *readNode( char *line ){
 		node_t *nod = (node_t *) malloc(sizeof(node_t));
 		char **arg;
 		makeargv( line, ":\n", &arg );
 
-		strcpy( nod->prog, arg[ 0 ] );
-		strcpy( nod->input, arg[ 2 ] );
-		strcpy( nod->output, arg[ 3 ] );
+		if(*arg == NULL){//blank line hit
+			return NULL;//no node to be read here!
+		}
+
+	    strcpy( nod->prog, arg[ 0 ] );
+	    strcpy( nod->input, arg[ 2 ] );
+	    strcpy( nod->output, arg[ 3 ] );
 
 		char **childt;
 		int nchild = makeargv( arg[ 1 ], " ", &childt );
@@ -35,18 +37,7 @@ node_t *readNode( char *line ){
 		return nod;
 }
 
-/* Returns a line from the file in */
-char *getLine( FILE *in, int buf ){
-	char c;
-	char *line = malloc(sizeof(char) * buf);
-	int i;
-	for (i = 0; (i < buf - 1) && ((c = getc(in)) != EOF) && (c != '\n'); i++ )
-		line[ i ] = c;
-	line [ i ] = '\0';
-	return line;
-}
-
-
+/* redirects stdin and stdout to *n's input and output files, respectively */
 void redirect(node_t *n){
 	int input_file = open(n->input, O_RDONLY);
 	if (input_file < 0){
