@@ -71,13 +71,8 @@ int main(int argc, char *argv[]){
 			return 1;
 		}
 		else {  //is parent
-			pid_t w;
-			while( (w = r_wait( NULL )) > 0 ) { //waiting for children
+			while( r_wait( NULL ) > 0 ) { //waiting for children
 				;//do nothing
-			}
-			if ( w == -1 ) {
-				perror( "Parent failed to wait" ); //wait error check
-				return 1;
 			}
 		}
 	}
