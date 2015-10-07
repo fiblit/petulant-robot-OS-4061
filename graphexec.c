@@ -130,21 +130,38 @@ int main(int argc, char *argv[])
 	rowlist_t rl = buildRowList ( nodes, fileLineCount );
 
 	for (int row = 0; row < fileLineCount; row++){
-		int numInRow;
+		int numInRow = 0;
 		for (int j = 0; j < fileLineCount; j++){
             if (rl[ row ][ j ]==NULL){
                 numInRow++;
                 break;
             }
 		}
+
 		int i;
+		pid_t childpid;
 		for ( i = 0; i < numInRow; i++ ) {
+			fprintf(stderr, "row: %d i: %d\n",row,i);
 			if (( childpid == fork()) <= 0 ) { //fan creation
 				break;
 			}
 		}
 		if ( childpid == 0 ) {
-
+			redirect( rl[ row ][ i ] );
+			char **nodeArgs;
+			makeargv(rl[ row ][ i ]->prog, " ", &nodeArgs);
+			execvp( nodeArgs[0], &nodeArgs[0] );
+			perror("Child failed to execvp the command");
+			return 1;
+		}
+		else if ( childpid == -1 ) {
+			perror( "fork failed to execute" );
+			return 1;
+		}
+		else {  //is parent
+			while ( r_wait( NULL ) > 0 ) {
+				; //Waiting for children
+			}
 		}
 	}
 

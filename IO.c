@@ -48,7 +48,7 @@ char *getLine( FILE *in, int buf ){
 
 
 void redirect(node_t *n){
-	int input_file = open(n->input, O_RDONLY);
+	int input_file = open("blank-file.txt", O_RDONLY);
 	if (input_file < 0){
 		perror("Error opening input file in child after fork! Exiting.");
 		exit(0);
