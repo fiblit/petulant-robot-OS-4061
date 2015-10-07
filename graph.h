@@ -6,11 +6,7 @@
 #include "sys/types.h"
 #include <stdio.h>
 
-//I feel like using an enum is a better idea but whatevs.
-#define INELIGIBLE 0
-#define READY 1
-#define RUNNING 2
-#define FINISHED 3
+
 typedef struct node {
 	//id seems unnessecary, IO.c should track that.
 	int id; //corresponds to line number in graph text file

@@ -22,12 +22,12 @@ int main(int argc, char *argv[]){
 		return 1;
 	}
 
-	char line[ 1024 ]; //max length of a line
-	node_t *(nodes[ 50 ]); //50 max amt of lines/nodes
+	char line[ MAXLINELENGTH ]; //max length of a line
+	node_t *(nodes[ MAXNODES ]); //50 max amt of lines/nodes
 	int fileLineCount = 0;
 
 	//this while loop will read all the lines of the file until it the file is complete
-	while ( fgets( line, 1024, graphFile ) != NULL && fileLineCount < 50 ) {
+	while ( fgets( line, MAXLINELENGTH, graphFile ) != NULL && fileLineCount < 50 ) {
 		node_t *n = readNode( line );
 		if (n != NULL){//blank line was NOT read
 			nodes[ fileLineCount ] = n;

@@ -1,0 +1,39 @@
+/* login: hildr039, kohnx074
+ * date: 08/07/2015
+ * name: Dalton Hildreth, Timothy Kohn
+ * id: 5117575, 4050267
+ */
+
+Purpose of Program
+--------------------------------------
+The purpose of the graphexec program is to analyze a graph of user programs and
+determine which of these are eligible to run at the time, then running them in the
+proper order.
+
+How to Compile Program
+--------------------------------------
+To compile our program, all you have to do is type make at the command line.
+This will compile everything that needs to be compiled to create an executable.
+
+example: % make
+
+How to Use the Program
+--------------------------------------
+Once the program is compiled, you can run it by typing
+./graphexec some-graph-file.txt
+where some-graph-file.txt is the graphfile you want graphexec to analyze and run.
+
+example: % ./graphexec testgraph1.txt
+
+What Exactly graphexec Does
+--------------------------------------
+graphexec first reads nodes from the given text file (one per line), then builds
+a rowlist which determines which nodes are allowed to run. It then runs those
+nodes and moves on to the next row, which has the next nodes which are allowed
+to run. It does this until there are no more nodes available to run, and the
+program is finished.
+
+x500s
+--------------------------------------
+hildr039
+kohnx074

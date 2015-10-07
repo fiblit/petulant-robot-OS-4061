@@ -32,7 +32,6 @@ node_t *readNode( char *line ){
 		}
 			nod->num_parents = 0;
 			nod->temp = 0;
-			nod->status = INELIGIBLE;
 			nod->pid = -1;
 		return nod;
 }

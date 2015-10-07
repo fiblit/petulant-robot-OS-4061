@@ -8,4 +8,7 @@
 #include "restart.h"
 #include "makeargv.h"
 
+#define MAXNODES 50
+#define MAXLINELENGTH 1024
+
 #endif
