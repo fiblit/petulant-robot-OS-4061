@@ -9,8 +9,6 @@
 
 node_t *readNode( char *line );
 
-char *getLine( FILE *in, int buf );
-
 void redirect(node_t *n);
 
 #endif

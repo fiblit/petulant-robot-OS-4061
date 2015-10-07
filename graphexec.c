@@ -1,7 +1,8 @@
 #include "graphexec.h"
 
-int main(int argc, char *argv[])
-{
+
+int main(int argc, char *argv[]){
+    //node_t *n = readNode("");
 
 	//making sure there are correct # of arguments
 	if ( argc != 2 ) {
@@ -24,12 +25,14 @@ int main(int argc, char *argv[])
 
 	//this while loop will read all the lines of the file until it the file is complete
 	while ( fgets( line, 1024, graphFile ) != NULL && fileLineCount < 50 ) {
-		nodes[fileLineCount] = readNode( line );
+		node_t *n = readNode( line );
+		if (n != NULL){//blank line was read
+            nodes[ fileLineCount ] = n;
+		}
 		printf("nodes stuff: %d \n", nodes[ fileLineCount ]->num_children);
 		printf("fileLineCount: %d \n", fileLineCount);
 		fileLineCount++;  //increment fileLineCount
 	}
-
 
 	//TODO: add detectLoops here
 
@@ -73,22 +76,6 @@ int main(int argc, char *argv[])
 			}
 		}
 	}
-
-	/*
-	for ( int i = 0; i < rowList.size(); i++ ){
-		fan ( rowList[i].size() )
-		if childpid == 0
-			redirect (nodeij.files)
-			exec (nodeij.prog)
-		else
-			while (r_wait > 0)
-	*/
-
-
-
-
-
-	//then execution loop
 
 	return 0;
 }
