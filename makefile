@@ -1,8 +1,8 @@
 #TODO: add debug option
 all: graphexec
 
-graphexec: graphexec.o IO.o graph.o makeargv.o
-	gcc graphexec.o IO.o graph.o makeargv.o -o graphexec
+graphexec: graphexec.o IO.o graph.o makeargv.o restart.o
+	gcc graphexec.o IO.o graph.o makeargv.o restart.o -o graphexec
 
 graphexec.o: graphexec.c graphexec.h
 	gcc -g -std=c99 -c graphexec.c
@@ -12,6 +12,8 @@ graph.o: graph.c graph.h
 	gcc -g -std=c99 -c graph.c
 makeargv.o: makeargv.c makeargv.h
 	gcc -g -std=c99 -c makeargv.c
+restart.o: restart.c restart.h
+	gcc -g -std=c99 -c restart.c
 #I usually like having a bin and obj folder, but this project is so small that it can be added it later.
 #obj/:
 #	mkdir obj/

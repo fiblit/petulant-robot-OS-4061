@@ -6,7 +6,7 @@
 node_t *readNode( char *line ){
 		node_t *nod = (node_t *) malloc(sizeof(node_t));
 		char **arg;
-		makeargv( line, ":", &arg );
+		makeargv( line, ":\n", &arg );
 
 
 		strcpy( nod->prog, arg[ 0 ] );
@@ -49,7 +49,7 @@ char *getLine( FILE *in, int buf ){
 
 
 void redirect(node_t *n){
-	int input_file = open(n->input, O_RDONLY);
+	int input_file = open("blank-file.txt", O_RDONLY);
 	if (input_file < 0){
 		perror("Error opening input file in child after fork! Exiting.");
 		exit(0);
