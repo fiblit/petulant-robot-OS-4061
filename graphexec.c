@@ -127,7 +127,7 @@ int main(int argc, char *argv[])
 	}
 
 
-	//detectLoops function should be here
+	//TODO: add detectLoops here
 
 	//buildRowList()
 	//buildRowList from our group of nodes here
@@ -138,15 +138,15 @@ int main(int argc, char *argv[])
 		int numInRow = 0;
 		for (int j = 0; j < fileLineCount; j++){
             if (rl[ row ][ j ]==NULL){
-                numInRow++;
                 break;
             }
+			numInRow++;
 		}
 
 		int i;
 		pid_t childpid;
 		for ( i = 0; i < numInRow; i++ ) {
-			fprintf(stderr,"row:%d col:%d\n",row,i);
+			fprintf(stderr, "row:%d col:%d\n", row, i);
 			if (( childpid = fork()) <= 0 ) { //fan creation
 				break;
 			}
