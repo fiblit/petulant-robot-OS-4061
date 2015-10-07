@@ -31,6 +31,7 @@ int main(int argc, char *argv[]){
 		node_t *n = readNode( line );
 		if (n != NULL){//blank line was NOT read
 			nodes[ fileLineCount ] = n;
+			nodes[ fileLineCount ]->id = fileLineCount;
 			fileLineCount++;  //increment fileLineCount
 		}
 	}
@@ -64,7 +65,8 @@ int main(int argc, char *argv[]){
 			makeargv(rl[ row ][ i ]->prog, " ", &nodeArgs);
 			redirect( rl[ row ][ i ] );
 			execvp( nodeArgs[0], &nodeArgs[0] );
-			perror("Child failed to execvp the command"); //execvp error check
+			fprintf(stderr, "The %dth node", rl[ row ][ i ]->id);
+			perror(" failed to execvp the command"); //execvp error check
 			return 1;
 		}
 		else if ( childpid == -1 ) {  //fork() error check
