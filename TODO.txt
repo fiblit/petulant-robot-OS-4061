@@ -20,21 +20,11 @@ Tasks:
 Or you can just type them in any format. I honestly don't care, but any
 added order can be nice.
 
-4 : Add BFS/Loop detect : low priority : Dalton
-	There will be a slightly modified form of BFS to ensure that there 
-	are no cycles in the input graph. This is nessecary for the
-	construction of the row list.
+8 : Add #defines for unnamed constants : high priority : ?
+	...
 
-5 : Main Functionality : high priority : Tim...?
-	Some things main will include:
-	-Reading file into nodes buffer/array
-	-Process fan over the current row of the row list.
-	-Exec each node in that row.
-	-The control process (main) will wait all of the nodes in the row (needs the r_wait function)
-6 : Integrate New Types/Structures : high priority : both
-	In commit 95f832eb7ea326b5946bb365d0c34b1000e1e79e I changed many
-	of the types used by graph.c and IO.c
-	graphexec.c needs to be updated accordingly
+9 : Add README : high priority : Tim
+	...
 
 Again, github supports a lot of these things. Normally I just handle my
 TODO locally, but since we are working together it might be beneficial
