@@ -29,11 +29,10 @@ int main(int argc, char *argv[]){
 	//this while loop will read all the lines of the file until it the file is complete
 	while ( fgets( line, 1024, graphFile ) != NULL && fileLineCount < 50 ) {
 		node_t *n = readNode( line );
-		if (n != NULL){//blank line was read
+		if (n != NULL){//blank line was NOT read
 			nodes[ fileLineCount ] = n;
 			fileLineCount++;  //increment fileLineCount
 		}
-		
 	}
 
 	//buildRowList from our group of nodes here
