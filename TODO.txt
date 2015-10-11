@@ -20,12 +20,6 @@ Tasks:
 Or you can just type them in any format. I honestly don't care, but any
 added order can be nice.
 
-8 : Add #defines for unnamed constants : high priority : ?
-	...
-
-9 : Add README : high priority : Tim
-	...
-
 Again, github supports a lot of these things. Normally I just handle my
 TODO locally, but since we are working together it might be beneficial
 to use it together, or to use github. If we do end up sharing this file
