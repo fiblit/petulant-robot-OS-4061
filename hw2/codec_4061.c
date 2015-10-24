@@ -29,7 +29,6 @@ int main( int argc, char *argv[] ) {
 		output = (char *) malloc( sizeof( char ) * lenOut );
 		strcpy( output, argv[ 3 ]);
 	}
-
 	char *output_input = (char *) malloc( sizeof( char ) * (lenOut + 1 + lenIn + 1) );//output/input not output_input :p
 	output_input[ 0 ] = '\0';
 	strcat( strcat( strcat( output_input, output ), "/"), input);
@@ -118,3 +117,4 @@ int mkdir_r( char *dir ) {
 	}
 	return retval;
 }
+
