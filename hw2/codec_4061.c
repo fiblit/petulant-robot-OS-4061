@@ -2,7 +2,7 @@
 
 int main( int argc, char *argv[] ) {
 	if (argc != 4 || strlen( argv[ 1 ] ) != 2 || argv[ 1 ][ 0 ] != '-') {
-		printf( "Usage: %s -(e|d) (input_dir) (output_dir)", argv[ 0 ] );
+		printf( "Usage: %s -[ed] <input_dir> <output_dir>", argv[ 0 ] );
 		return 1;
 	}
 	bool isEncode = ( argv[ 1 ][ 1 ] == 'e' );
@@ -32,7 +32,8 @@ int main( int argc, char *argv[] ) {
 	char *output_input = (char *) malloc( sizeof( char ) * (lenOut + 1 + lenIn + 1) );//output/input not output_input :p
 	output_input[ 0 ] = '\0';
 	strcat( strcat( strcat( output_input, output ), "/"), input);
-	mkdir_r( output_input );
+	if(mkdir_r( output_input ) == -1)
+		return -1;
 
 	char *reportName = (char *) malloc( sizeof( char ) * (lenOut + 1 + lenIn + 11 + 1));//the final plus one is for \0
 	reportName[ 0 ] = '\0';
@@ -42,7 +43,7 @@ int main( int argc, char *argv[] ) {
 	free( output );
 
 	if (codeDir( input, output_input, isEncode, freport ) != 0) {
-		exit(EXIT_FAILURE);
+		return -1;
 	}
 	free( input );
 	free( output_input );
@@ -77,28 +78,36 @@ int codeDir( char *input, char *output, bool isEncode, FILE* report ) {//TODO: l
 		strcat( strcat( strcat( outputFile, output ), "/" ), entry->d_name );
 
 		struct stat ebuf;
-		if (stat( inputFile, &ebuf ) == -1) {
+		if (stat( inputFile, &ebuf ) == -1) {//TODO: change stat to lstat for EC
 			fprintf( stderr, "There was an error in reading information about %s/%s:\n\t%s\n", input, entry->d_name, strerror( errno ));
 			return -1;
 		}
 		
 		if (S_ISDIR( ebuf.st_mode )) {
-			mkdir_r( outputFile );//in this case the "file" is specifically a dir
-			if (codeDir(inputFile, outputFile, isEncode, report) != 0)
+			
+			if(mkdir_r( outputFile ) == -1)//in this case the "file" is specifically a dir
 				return -1;
-			//TODO: add report statement for directory
+			if (codeDir( inputFile, outputFile, isEncode, report ) != 0)
+				return -1;
+			
+			//write to report
+			fprintf( report, "%s, directory, 0, 0\n", entry->d_name);
 		}
 		else {
 			FILE *in = fopen( inputFile, "r");
 			FILE *out = fopen( outputFile, "w");
+		    struct stat inbuf;
+			stat( inputFile, &inbuf );//to find filesize of inputFile
+			int inSize = (int)inbuf.st_size;
 			//TODO: encode/decode the file input/entry->d_name
 			fclose( in );
+			struct stat outbuf;//TODO: maybe change this to just a return from encodeFile/decodeFile
+			stat( outputFile, &outbuf );//to find filesize of outputFile
+			int outSize = (int)outbuf.st_size;
 			fclose( out );
 
 			//write to report
-			fputs(entry->d_name, report );
-			//TODO: write more info to report based on coding
-			fputc('\n', report );
+			fprintf( report, "%s, regular file, %d, %d\n", entry->d_name, inSize, outSize);
 		}
 
 		free( inputFile );
@@ -113,7 +122,6 @@ int mkdir_r( char *dir ) {
 	// if retval is 0, then dir was created successfuly
 	if (retval == -1) {
 		fprintf( stderr, "mkdir() failed: %s\n", strerror( errno ));
-		exit(EXIT_FAILURE);//TODO: get rid of this :P
 	}
 	return retval;
 }
