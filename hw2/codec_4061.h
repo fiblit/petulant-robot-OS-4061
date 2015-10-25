@@ -13,7 +13,8 @@
 #include <unistd.h>
 #include <dirent.h>
 
-int codeDir(char *input, char *output, bool isEncode, FILE* report);
-int mkdir_r(char *dir);
+char *fqsort( FILE *f );
+int codeDir( char *input, char *output, bool isEncode, FILE* report );
+int mkdir_r( char *dir );
 
 #endif //CODEC_4061_H

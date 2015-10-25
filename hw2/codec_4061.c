@@ -38,8 +38,7 @@ int main( int argc, char *argv[] ) {
 	char *reportName = (char *) malloc( sizeof( char ) * (lenOut + 1 + lenIn + 11 + 1));//the final plus one is for \0
 	reportName[ 0 ] = '\0';
    	strcat( strcat( reportName, output_input), "_report.txt");
-	FILE *freport = fopen( reportName, "a+");
-	free( reportName );
+	FILE *freport = fopen( reportName, "a+" );
 	free( output );
 
 	if (codeDir( input, output_input, isEncode, freport ) != 0) {
@@ -47,10 +46,66 @@ int main( int argc, char *argv[] ) {
 	}
 	free( input );
 	free( output_input );
-	//TODO: sort report file :P
+
+	char *s = fqsort( freport );
+	fclose( freport );
+	freport = fopen( reportName, "w+" );
+	fputs( s, freport );
+	free( reportName );
 	fclose( freport );
 	
 	return 0;
+}
+
+static int pstrcompare( const void *p1, const void *p2 ) { //static since only the below qsort needs this.
+	return strcmp( *(char * const *)p1, *(char * const *)p2 );
+}
+
+char *fqsort( FILE *f ) {
+	rewind( f );
+	char c = fgetc( f );
+	int numLine = 0;
+	while (c != EOF) {
+		if (c == '\n') {
+			numLine++;
+		}
+		c = fgetc( f );
+	}
+	rewind( f );
+
+	//read in lines from file
+	char **lines = (char **)malloc( sizeof( char * ) * numLine );
+	int totalLen = 0;
+	for (int i = 0; i < numLine; i++) {
+		int lineLen = 0;
+		char c = fgetc( f );
+		while (c != '\n' && c != EOF) {
+			lineLen++;
+			c = fgetc( f );
+		}
+		if (c == '\n') {
+			lineLen++; //include '\n' in line
+			c = fgetc( f );
+		}
+		totalLen += lineLen;
+
+		lines[ i ] = (char *)malloc( sizeof( char ) * lineLen );
+		fseek( f, -lineLen - 1, SEEK_CUR);
+		fgets( lines[ i ], lineLen + 1, f );
+		printf( "%s", lines[ i ] );
+	}
+	totalLen += 1;//1 for the EOF
+
+	qsort( lines, numLine, sizeof( char * ), pstrcompare );
+
+	char *s = (char *)malloc( sizeof( char ) * totalLen );
+	s[ 0 ] = '\0';
+	for (int i = 0; i < numLine; i++) {
+		strcat( s, lines[ i ] );
+		free( lines[ i ] );
+	}
+	return s;
+	free( lines );
 }
 
 /* This function will encode or decode the files of the directory input */
