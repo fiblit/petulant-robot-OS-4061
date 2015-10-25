@@ -13,8 +13,10 @@
 #include <unistd.h>
 #include <dirent.h>
 
+#include "inodeLL.h"
+
 char *fqsort( FILE *f );
-int codeDir( char *input, char *output, bool isEncode, FILE* report );
+int codeDir( char *input, char *output, bool isEncode, FILE* report, inodeLL_t fileInodes );
 int mkdir_r( char *dir );
 
 #endif //CODEC_4061_H

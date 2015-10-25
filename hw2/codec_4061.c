@@ -8,25 +8,21 @@ int main( int argc, char *argv[] ) {
 	bool isEncode = ( argv[ 1 ][ 1 ] == 'e' );
 
 	int lenIn = strlen( argv[ 2 ] );
-	char *input; 
+	char *input = (char *) malloc( sizeof( char ) * (lenIn) );
 	if (argv[ 2 ][ lenIn - 1 ] == '/') {
-		input = (char *) malloc( sizeof( char ) * (lenIn - 1) );
 		strncpy( input, argv[ 2 ], lenIn - 1);
 		input[ lenIn ] = '\0';//overwrite the dumb final '/' 
 	}
 	else {
-		input = (char *) malloc( sizeof( char ) * lenIn );
 		strcpy( input, argv[ 2 ]);
 	}
 	int lenOut = strlen( argv[ 3 ] );
-	char *output;
+	char *output = (char *) malloc( sizeof( char ) * (lenOut) );
 	if (argv[ 3 ][ lenOut - 1 ] == '/') {
-		output = (char *) malloc( sizeof( char ) * (lenOut - 1) );
 		strncpy( output, argv[ 3 ], lenOut - 1);
 		output[ lenOut ] = '\0';//overwrite the dumb final '/'
 	}
 	else {
-		output = (char *) malloc( sizeof( char ) * lenOut );
 		strcpy( output, argv[ 3 ]);
 	}
 	char *output_input = (char *) malloc( sizeof( char ) * (lenOut + 1 + lenIn + 1) );//output/input not output_input :p
@@ -41,9 +37,13 @@ int main( int argc, char *argv[] ) {
 	FILE *freport = fopen( reportName, "a+" );
 	free( output );
 
-	if (codeDir( input, output_input, isEncode, freport ) != 0) {
+	inodeLL_t fileInodes = inodeLL_construct();
+
+	if (codeDir( input, output_input, isEncode, freport, fileInodes ) != 0) {
 		return -1;
 	}
+
+	inodeLL_destruct( fileInodes );
 	free( input );
 	free( output_input );
 
@@ -89,7 +89,7 @@ char *fqsort( FILE *f ) {
 		}
 		totalLen += lineLen;
 
-		lines[ i ] = (char *)malloc( sizeof( char ) * lineLen );
+		lines[ i ] = (char *)malloc( sizeof( char ) * (lineLen + 1) );
 		fseek( f, -lineLen , SEEK_CUR);
 		fgets( lines[ i ], lineLen + 1, f );
 	}
@@ -108,7 +108,7 @@ char *fqsort( FILE *f ) {
 }
 
 /* This function will encode or decode the files of the directory input */
-int codeDir( char *input, char *output, bool isEncode, FILE* report ) {//TODO: list of inodes for EC
+int codeDir( char *input, char *output, bool isEncode, FILE* report, inodeLL_t fileInodes ) {
 	struct stat buf;
 	if (stat( input, &buf ) == -1) {
 		fprintf( stderr, "There was an error reading info about %s\n\t%s\n", input, strerror( errno ) );
@@ -132,7 +132,7 @@ int codeDir( char *input, char *output, bool isEncode, FILE* report ) {//TODO: l
 		strcat( strcat( strcat( outputFile, output ), "/" ), entry->d_name );
 
 		struct stat ebuf;
-		if (stat( inputFile, &ebuf ) == -1) {//TODO: change stat to lstat for EC
+		if (lstat( inputFile, &ebuf ) == -1) {
 			fprintf( stderr, "There was an error in reading information about %s/%s:\n\t%s\n", input, entry->d_name, strerror( errno ));
 			return -1;
 		}
@@ -141,27 +141,40 @@ int codeDir( char *input, char *output, bool isEncode, FILE* report ) {//TODO: l
 			
 			if(mkdir_r( outputFile ) == -1)//in this case the "file" is specifically a dir
 				return -1;
-			if (codeDir( inputFile, outputFile, isEncode, report ) != 0)
+			if (codeDir( inputFile, outputFile, isEncode, report, fileInodes ) != 0)
 				return -1;
 			
 			//write to report
-			fprintf( report, "%s, directory, 0, 0\n", entry->d_name);
+			fprintf( report, "%s, directory, 0, 0\n", entry->d_name );
+		}
+		else if(S_ISLNK( ebuf.st_mode )) {
+			//write to report
+			fprintf( report, "%s, sym link, 0, 0\n", entry->d_name );
 		}
 		else {
 			FILE *in = fopen( inputFile, "r");
-			FILE *out = fopen( outputFile, "w");
 		    struct stat inbuf;
-			stat( inputFile, &inbuf );//to find filesize of inputFile
+			stat( inputFile, &inbuf );
 			int inSize = (int)inbuf.st_size;
-			//TODO: encode/decode the file input/entry->d_name
-			fclose( in );
-			struct stat outbuf;//TODO: maybe change this to just a return from encodeFile/decodeFile
-			stat( outputFile, &outbuf );//to find filesize of outputFile
-			int outSize = (int)outbuf.st_size;
-			fclose( out );
+			ino_t inInode = inbuf.st_ino;
+			if (inodeLL_search( fileInodes, inInode )) {//is duplicate hard link
+				//write to report
+				fprintf( report, "%s, hard link, 0, 0\n", entry->d_name );
+			}
+			else {//new uncoded file
+				inodeLL_append( fileInodes, inInode );
 
-			//write to report
-			fprintf( report, "%s, regular file, %d, %d\n", entry->d_name, inSize, outSize);
+				FILE *out = fopen( outputFile, "w");
+				//TODO: encode/decode the file input/entry->d_name
+				struct stat outbuf;//TODO: maybe change this to just a return from encodeFile/decodeFile
+				stat( outputFile, &outbuf );//to find filesize of outputFile
+				int outSize = (int)outbuf.st_size;
+				fclose( out );
+				
+				//write to report
+				fprintf( report, "%s, regular file, %d, %d\n", entry->d_name, inSize, outSize );
+			}
+			fclose( in );
 		}
 
 		free( inputFile );
