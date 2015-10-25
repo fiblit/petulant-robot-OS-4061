@@ -91,7 +91,6 @@ char *fqsort( FILE *f ) {
 		lines[ i ] = (char *)malloc( sizeof( char ) * lineLen );
 		fseek( f, -lineLen , SEEK_CUR);
 		fgets( lines[ i ], lineLen + 1, f );
-		printf( "%s", lines[ i ] );
 	}
 	totalLen += 1;//1 for the EOF
 
