@@ -8,21 +8,25 @@ int main( int argc, char *argv[] ) {
 	bool isEncode = ( argv[ 1 ][ 1 ] == 'e' );
 
 	int lenIn = strlen( argv[ 2 ] );
-	char *input = (char *) malloc( sizeof( char ) * (lenIn) );
+	char *input; 
 	if (argv[ 2 ][ lenIn - 1 ] == '/') {
-		strncpy( input, argv[ 2 ], lenIn - 1);
-		input[ lenIn ] = '\0';//overwrite the dumb final '/' 
+		input = (char *) malloc( sizeof( char ) * lenIn );
+		input = (char *) memset( input, '\0', lenIn );//valgrind wouldn't shut up
+		strncpy( input, argv[ 2 ], lenIn - 1);//get rid of the final '/'
 	}
 	else {
+		input = (char *) malloc( sizeof( char ) * (lenIn + 1) );
 		strcpy( input, argv[ 2 ]);
 	}
 	int lenOut = strlen( argv[ 3 ] );
-	char *output = (char *) malloc( sizeof( char ) * (lenOut) );
+	char *output;
 	if (argv[ 3 ][ lenOut - 1 ] == '/') {
-		strncpy( output, argv[ 3 ], lenOut - 1);
-		output[ lenOut ] = '\0';//overwrite the dumb final '/'
+		output = (char *) malloc( sizeof( char ) * lenOut );
+		output = (char *) memset( output, '\0', lenOut );//valgrind wouldn't shut up
+		strncpy( output, argv[ 3 ], lenOut - 1);//get rid of the final '/'
 	}
 	else {
+		output = (char *) malloc( sizeof( char ) * (lenOut + 1) );
 		strcpy( output, argv[ 3 ]);
 	}
 	char *output_input = (char *) malloc( sizeof( char ) * (lenOut + 1 + lenIn + 1) );//output/input not output_input :p
