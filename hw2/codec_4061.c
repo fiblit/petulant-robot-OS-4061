@@ -77,20 +77,19 @@ char *fqsort( FILE *f ) {
 	char **lines = (char **)malloc( sizeof( char * ) * numLine );
 	int totalLen = 0;
 	for (int i = 0; i < numLine; i++) {
-		int lineLen = 0;
 		char c = fgetc( f );
+		int lineLen = 1;
 		while (c != '\n' && c != EOF) {
+			c = fgetc( f );
 			lineLen++;
-			c = fgetc( f );
 		}
-		if (c == '\n') {
-			lineLen++; //include '\n' in line
-			c = fgetc( f );
+		if (c == EOF) {
+			lineLen--; //include '\n' in line
 		}
 		totalLen += lineLen;
 
 		lines[ i ] = (char *)malloc( sizeof( char ) * lineLen );
-		fseek( f, -lineLen - 1, SEEK_CUR);
+		fseek( f, -lineLen , SEEK_CUR);
 		fgets( lines[ i ], lineLen + 1, f );
 		printf( "%s", lines[ i ] );
 	}
