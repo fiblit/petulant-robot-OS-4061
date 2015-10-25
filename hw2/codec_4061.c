@@ -51,6 +51,7 @@ int main( int argc, char *argv[] ) {
 	fclose( freport );
 	freport = fopen( reportName, "w+" );
 	fputs( s, freport );
+	free( s );
 	free( reportName );
 	fclose( freport );
 	
@@ -96,14 +97,14 @@ char *fqsort( FILE *f ) {
 
 	qsort( lines, numLine, sizeof( char * ), pstrcompare );
 
-	char *s = (char *)malloc( sizeof( char ) * totalLen );
-	s[ 0 ] = '\0';
+	char *retstr = (char *)malloc( sizeof( char ) * totalLen );
+	retstr[ 0 ] = '\0';
 	for (int i = 0; i < numLine; i++) {
-		strcat( s, lines[ i ] );
+		strcat( retstr, lines[ i ] );
 		free( lines[ i ] );
 	}
-	return s;
 	free( lines );
+	return retstr;
 }
 
 /* This function will encode or decode the files of the directory input */
@@ -167,6 +168,7 @@ int codeDir( char *input, char *output, bool isEncode, FILE* report ) {//TODO: l
 		free( outputFile );
 		entry = readdir( indir );
 	}
+	closedir( indir );
 	return 0; //Nothing bad happened
 }
 
