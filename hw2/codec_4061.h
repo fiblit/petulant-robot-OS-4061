@@ -14,6 +14,7 @@
 #include <dirent.h>
 
 #include "inodeLL.h"
+#include "encode_decode.h"
 
 char *fqsort( FILE *f );
 int codeDir( char *input, char *output, bool isEncode, FILE* report, inodeLL_t fileInodes );

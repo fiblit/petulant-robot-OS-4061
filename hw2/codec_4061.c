@@ -8,7 +8,7 @@ int main( int argc, char *argv[] ) {
 	bool isEncode = ( argv[ 1 ][ 1 ] == 'e' );
 
 	int lenIn = strlen( argv[ 2 ] );
-	char *input; 
+	char *input;
 	if (argv[ 2 ][ lenIn - 1 ] == '/') {
 		input = (char *) malloc( sizeof( char ) * lenIn );
 		input = (char *) memset( input, '\0', lenIn );//valgrind wouldn't shut up
@@ -58,7 +58,7 @@ int main( int argc, char *argv[] ) {
 	free( s );
 	free( reportName );
 	fclose( freport );
-	
+
 	return 0;
 }
 
@@ -119,7 +119,7 @@ int codeDir( char *input, char *output, bool isEncode, FILE* report, inodeLL_t f
 		return -1;
 	}
 	DIR *indir = opendir( input );
-	
+
 	//TODO: further error checking (e.g. mkdir_r)
 	struct dirent *entry = readdir( indir );
 	while (entry != NULL) {
@@ -140,14 +140,14 @@ int codeDir( char *input, char *output, bool isEncode, FILE* report, inodeLL_t f
 			fprintf( stderr, "There was an error in reading information about %s/%s:\n\t%s\n", input, entry->d_name, strerror( errno ));
 			return -1;
 		}
-		
+
 		if (S_ISDIR( ebuf.st_mode )) {
-			
+
 			if(mkdir_r( outputFile ) == -1)//in this case the "file" is specifically a dir
 				return -1;
 			if (codeDir( inputFile, outputFile, isEncode, report, fileInodes ) != 0)
 				return -1;
-			
+
 			//write to report
 			fprintf( report, "%s, directory, 0, 0\n", entry->d_name );
 		}
@@ -169,12 +169,14 @@ int codeDir( char *input, char *output, bool isEncode, FILE* report, inodeLL_t f
 				inodeLL_append( fileInodes, inInode );
 
 				FILE *out = fopen( outputFile, "w");
+				//will be if ( isEncode ) ..
+				int outSize = encode ( in, out, inSize);
 				//TODO: encode/decode the file input/entry->d_name
-				struct stat outbuf;//TODO: maybe change this to just a return from encodeFile/decodeFile
-				stat( outputFile, &outbuf );//to find filesize of outputFile
-				int outSize = (int)outbuf.st_size;
+				//struct stat outbuf;//TODO: maybe change this to just a return from encodeFile/decodeFile
+				//stat( outputFile, &outbuf );//to find filesize of outputFile
+				//int outSize = (int)outbuf.st_size;
 				fclose( out );
-				
+
 				//write to report
 				fprintf( report, "%s, regular file, %d, %d\n", entry->d_name, inSize, outSize );
 			}
@@ -197,4 +199,3 @@ int mkdir_r( char *dir ) {
 	}
 	return retval;
 }
-
