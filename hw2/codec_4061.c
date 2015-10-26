@@ -169,8 +169,14 @@ int codeDir( char *input, char *output, bool isEncode, FILE* report, inodeLL_t f
 				inodeLL_append( fileInodes, inInode );
 
 				FILE *out = fopen( outputFile, "w");
-				//will be if ( isEncode ) ..
-				int outSize = encode ( in, out, inSize);
+				int outSize = 0;
+				if ( isEncode ) { // encode
+					outSize = encode ( in, out, inSize );
+				}
+				else {  // decode
+					outSize = decode ( in, out, inSize );
+				}
+
 				//TODO: encode/decode the file input/entry->d_name
 				//struct stat outbuf;//TODO: maybe change this to just a return from encodeFile/decodeFile
 				//stat( outputFile, &outbuf );//to find filesize of outputFile
