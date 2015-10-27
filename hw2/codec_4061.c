@@ -11,31 +11,55 @@ int main( int argc, char *argv[] ) {
 	char *input;
 	if (argv[ 2 ][ lenIn - 1 ] == '/') {
 		input = (char *) malloc( sizeof( char ) * lenIn );
+		if ( input == NULL ) { //malloc error checking
+	        perror( "Call to malloc failed in main" );
+	        return -1;
+	    }
 		input = (char *) memset( input, '\0', lenIn );//valgrind wouldn't shut up
 		strncpy( input, argv[ 2 ], lenIn - 1);//get rid of the final '/'
 	}
 	else {
 		input = (char *) malloc( sizeof( char ) * (lenIn + 1) );
+		if ( input == NULL ) { //malloc error checking
+	        perror( "Call to malloc failed in main" );
+	        return -1;
+	    }
 		strcpy( input, argv[ 2 ]);
 	}
 	int lenOut = strlen( argv[ 3 ] );
 	char *output;
 	if (argv[ 3 ][ lenOut - 1 ] == '/') {
 		output = (char *) malloc( sizeof( char ) * lenOut );
+		if ( output == NULL ) { //malloc error checking
+	        perror( "Call to malloc failed in main" );
+	        return -1;
+	    }
 		output = (char *) memset( output, '\0', lenOut );//valgrind wouldn't shut up
 		strncpy( output, argv[ 3 ], lenOut - 1);//get rid of the final '/'
 	}
 	else {
 		output = (char *) malloc( sizeof( char ) * (lenOut + 1) );
+		if ( output == NULL ) { //malloc error checking
+	        perror( "Call to malloc failed in main" );
+	        return -1;
+	    }
 		strcpy( output, argv[ 3 ]);
 	}
 	char *output_input = (char *) malloc( sizeof( char ) * (lenOut + 1 + lenIn + 1) );//output/input not output_input :p
+	if ( output_input == NULL ) { //malloc error checking
+		perror( "Call to malloc failed in main" );
+		return -1;
+	}
 	output_input[ 0 ] = '\0';
 	strcat( strcat( strcat( output_input, output ), "/"), input);
 	if(mkdir_r( output_input ) == -1)
 		return -1;
 
 	char *reportName = (char *) malloc( sizeof( char ) * (lenOut + 1 + lenIn + 11 + 1));//the final plus one is for \0
+	if ( reportName == NULL ) { //malloc error checking
+		perror( "Call to malloc failed in main" );
+		return -1;
+	}
 	reportName[ 0 ] = '\0';
    	strcat( strcat( reportName, output_input), "_report.txt");
 	FILE *freport = fopen( reportName, "a+" );
@@ -52,11 +76,19 @@ int main( int argc, char *argv[] ) {
 	free( output_input );
 
 	char *s = fqsort( freport );
+	if (ferror ( freport )) {
+		perror("Error in handling of freport");
+		return -1;
+	}
 	fclose( freport );
 	freport = fopen( reportName, "w+" );
 	fputs( s, freport );
 	free( s );
 	free( reportName );
+	if (ferror ( freport )) {
+		perror("Error in handling of freport");
+		return -1;
+	}
 	fclose( freport );
 
 	return 0;
@@ -80,6 +112,10 @@ char *fqsort( FILE *f ) {
 
 	//read in lines from file
 	char **lines = (char **)malloc( sizeof( char * ) * numLine );
+	if ( lines == NULL ) { //malloc error checking
+		perror( "Call to malloc failed in fqsort" );
+		exit ( EXIT_FAILURE );
+	}
 	int totalLen = 0;
 	for (int i = 0; i < numLine; i++) {
 		char c = fgetc( f );
@@ -94,6 +130,10 @@ char *fqsort( FILE *f ) {
 		totalLen += lineLen;
 
 		lines[ i ] = (char *)malloc( sizeof( char ) * (lineLen + 1) );
+		if ( lines[ i ] == NULL ) { //malloc error checking
+	        perror( "Call to malloc failed in fqsort" );
+	        exit ( EXIT_FAILURE );
+	    }
 		fseek( f, -lineLen , SEEK_CUR);
 		fgets( lines[ i ], lineLen + 1, f );
 	}
@@ -102,6 +142,10 @@ char *fqsort( FILE *f ) {
 	qsort( lines, numLine, sizeof( char * ), pstrcompare );
 
 	char *retstr = (char *)malloc( sizeof( char ) * totalLen );
+	if ( retstr == NULL ) { //malloc error checking
+		perror( "Call to malloc failed in fqsort" );
+		exit ( EXIT_FAILURE );
+	}
 	retstr[ 0 ] = '\0';
 	for (int i = 0; i < numLine; i++) {
 		strcat( retstr, lines[ i ] );
@@ -129,7 +173,15 @@ int codeDir( char *input, char *output, bool isEncode, FILE* report, inodeLL_t f
 		}
 
 		char *inputFile = (char *) malloc( sizeof( char ) * (strlen( input ) + 1 + strlen( entry->d_name ) + 1));
+		if ( inputFile == NULL ) { //malloc error checking
+	        perror( "Call to malloc failed in codeDir" );
+	        return -1;
+	    }
 		char *outputFile = (char *) malloc( sizeof( char ) * (strlen( output ) + 1 + strlen( entry->d_name ) + 1));
+		if ( outputFile == NULL ) { //malloc error checking
+	        perror( "Call to malloc failed in codeDir" );
+	        return -1;
+	    }
 		inputFile[ 0 ] = '\0';
 		outputFile[ 0 ] = '\0';
 		strcat( strcat( strcat( inputFile, input ), "/" ), entry->d_name );
@@ -177,14 +229,18 @@ int codeDir( char *input, char *output, bool isEncode, FILE* report, inodeLL_t f
 					outSize = decode ( in, out, inSize );
 				}
 
-				//TODO: encode/decode the file input/entry->d_name
-				//struct stat outbuf;//TODO: maybe change this to just a return from encodeFile/decodeFile
-				//stat( outputFile, &outbuf );//to find filesize of outputFile
-				//int outSize = (int)outbuf.st_size;
+				if (ferror ( out )) {
+					perror("Error in handling of out");
+					return -1;
+				}
 				fclose( out );
 
 				//write to report
 				fprintf( report, "%s, regular file, %d, %d\n", entry->d_name, inSize, outSize );
+			}
+			if (ferror ( in )) {
+				perror("Error in handling of in");
+				return -1;
 			}
 			fclose( in );
 		}

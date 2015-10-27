@@ -3,30 +3,21 @@
 int encode ( FILE * inFile, FILE* outFile, int inputSize)  {
     char *in = ( char * ) malloc ( sizeof ( char ) * inputSize + 3); // +3 for possible added zeroes and \n
     if ( in == NULL ) { //malloc error checking
-        perror( "Call to malloc failed" );
+        perror( "Call to malloc failed in encode" );
         return -1;
     }
     char *out = ( char * ) malloc (( sizeof ( char ) * inputSize ) * 2 ); //not sure how much to allocate, this works currently
     if ( out == NULL ) { //malloc error checking
-        perror( "Call to malloc failed" );
+        perror( "Call to malloc failed in encode" );
         return -1;
     }
 
     fread( in, sizeof(char), inputSize, inFile );
-    if ( ferror ( inFile )) { //fread error checking
-        perror( "fread encountered an error" );
-        return -1;
-    }
-
-    if ( feof ( inFile ) ) { //fread error checking
-        perror( "fread reached the EOF" );
-        return -1;
-    }
 
     //ZERO padding below
     int inputSizeModThree = inputSize % 3;
     uint8_t chZero = 0;  // padded zero char
-    if ( inputSizeModThree != 0 ) {  //makes sure its always a multiple of 3 being passed to encode_block
+    if ( inputSizeModThree != 0 ) {  //add padded zeroes
         memset ( in + ( inputSize ), chZero, inputSizeModThree );
     }
 
@@ -47,30 +38,11 @@ int encode ( FILE * inFile, FILE* outFile, int inputSize)  {
 
     fwrite( out, sizeof( char ), j, outFile );
 
-    if ( ferror ( outFile )) { //fwrite error checking
-        perror( "fwrite encountered an error" );
-        return -1;
-    }
-
-    if ( feof( outFile )) { //fwrite error checking
-        perror( "fwrite reached the EOF" );
-        return -1;
-    }
-
     unsigned char chNewLine = 0x0a; // a \n
 
     //if it wrote anything, append a \n
     if ( j != 0 ) {
         fputc( chNewLine, outFile );
-        if ( ferror ( outFile )) { //fputc error checking
-            perror( "fputc encountered an error" );
-            return -1;
-        }
-
-        if ( feof( outFile )) { //fputc error checking
-            perror( "fputc reached the EOF" );
-            return -1;
-        }
         j = j + 1; //wrote another byte
     }
 
@@ -83,31 +55,23 @@ int encode ( FILE * inFile, FILE* outFile, int inputSize)  {
 int decode ( FILE *inFile, FILE *outFile, int inputSize ) {
     char *in = ( char * ) malloc ( sizeof ( char ) * inputSize );
     if ( in == NULL ) { //malloc error checking
-        perror( "Call to malloc failed" );
+        perror( "Call to malloc failed in decode" );
         return -1;
     }
     char *valid_in = ( char * ) malloc ( sizeof ( char ) * inputSize );
     if ( valid_in == NULL ) { //malloc error checking
-        perror( "Call to malloc failed" );
+        perror( "Call to malloc failed in decode" );
         return -1;
     }
     char *out = ( char * ) malloc (( sizeof ( char ) * inputSize ) * 2 ); //not sure how much to allocate, this works currently
     if ( out == NULL ) { //malloc error checking
-        perror( "Call to malloc failed" );
+        perror( "Call to malloc failed in decode" );
         return -1;
     }
 
     fread( in, sizeof( char ), inputSize, inFile );
-    if ( ferror ( inFile )) { //fread error checking
-        perror("fread encountered an error");
-        return -1;
-    }
 
-    if ( feof ( inFile )) { //fread error checking
-        perror( "fread reached the EOF" );
-        return -1;
-    }
-
+    //loop variables
     int x = 0;
     int y = 0;
     int i = 0;
@@ -130,15 +94,6 @@ int decode ( FILE *inFile, FILE *outFile, int inputSize ) {
     }
 
     fwrite( out, sizeof( char ), j, outFile );
-    if ( ferror ( outFile )) { //fwrite error checking
-        perror( "fwrite encountered an error" );
-        return -1;
-    }
-
-    if ( feof ( outFile )) { //fwrite error checking
-        perror( "fwrite reached the EOF" );
-        return -1;
-    }
 
     free ( in );
     free ( valid_in );
