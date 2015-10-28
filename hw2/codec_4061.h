@@ -1,3 +1,10 @@
+/*
+ * name: Dalton Hildreth, Timothy Kohn
+ * x500: hildr039, kohnx074
+ * Student ids: 5117575, 4050267
+ * CSELabs machine: csel-kh4250-05.cselabs.umn.edu
+ */
+
 #ifndef CODEC_4061_H
 #define CODEC_4061_H
 

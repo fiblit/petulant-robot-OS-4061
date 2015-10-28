@@ -1,0 +1,29 @@
+/*
+ * name: Dalton Hildreth, Timothy Kohn
+ * x500: hildr039, kohnx074
+ * Student ids: 5117575, 4050267
+ * CSELabs machine: csel-kh4250-05.cselabs.umn.edu
+ */
+
+Purpose of your Program
+---------------------------------------
+The purpose of our program is to encode / decode all files present in the given input directory
+and outputting the encoding/decoding to the output directory.
+
+How to Compile Program
+---------------------------------------
+To compile the program simply type make into the command line,
+$ make
+
+How to Use the Program from the Shell
+---------------------------------------
+To use the program from the shell you must first compile it using make, then type
+./codec_4061 -(e|d) <directory input comes from> <output directory>
+(e|d) means either -e or -d (for encoding or decoding)
+for example, to encode from directory encodetest02 into directory output you would type
+$ ./codec_4061 -e encodetest02 output
+and to decode from directory decodetest02 into directory output you would type
+$ ./codec_4061 -d decodetest02 output
+
+What Exactly the Program Does
+---------------------------------------

@@ -1,3 +1,10 @@
+/*
+ * name: Dalton Hildreth, Timothy Kohn
+ * x500: hildr039, kohnx074
+ * Student ids: 5117575, 4050267
+ * CSELabs machine: csel-kh4250-05.cselabs.umn.edu
+ */
+
 #include "codec_4061.h"
 
 int main( int argc, char *argv[] ) {

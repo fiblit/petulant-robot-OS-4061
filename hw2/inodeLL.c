@@ -1,10 +1,17 @@
+/*
+ * name: Dalton Hildreth, Timothy Kohn
+ * x500: hildr039, kohnx074
+ * Student ids: 5117575, 4050267
+ * CSELabs machine: csel-kh4250-05.cselabs.umn.edu
+ */
+
 #include "inodeLL.h"
 
 inodeLL_t inodeLL_construct() {
     inodeLL_t list = (inodeLL_t)malloc( sizeof( inodeLLNode ) );
     list->inode = -1;
     list->next = NULL;
-    return list;    
+    return list;
 }
 
 void inodeLL_destruct( inodeLL_t list ) {
