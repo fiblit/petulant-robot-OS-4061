@@ -1,24 +1,29 @@
 #include "codec_4061.h"
 
 int main( int argc, char *argv[] ) {
+
+	/* Input validation and reading */
 	if (argc != 4 || strlen( argv[ 1 ] ) != 2 || argv[ 1 ][ 0 ] != '-') {
 		printf( "Usage: %s -[ed] <input_dir> <output_dir>", argv[ 0 ] );
 		return 1;
 	}
+
+	/* read encoding parameter */
 	bool isEncode = ( argv[ 1 ][ 1 ] == 'e' );
 
+	/* Read Input parameter */
 	int lenIn = strlen( argv[ 2 ] );
 	char *input;
-	if (argv[ 2 ][ lenIn - 1 ] == '/') {
+	if (argv[ 2 ][ lenIn - 1 ] == '/') { //The case where "dir/" is entered (removes the /)
 		input = (char *) malloc( sizeof( char ) * lenIn );
 		if ( input == NULL ) { //malloc error checking
 	        perror( "Call to malloc failed in main" );
 	        return -1;
 	    }
-		input = (char *) memset( input, '\0', lenIn );//valgrind wouldn't shut up
+		input = (char *) memset( input, '\0', lenIn );//valgrind wouldn't shut up about uninitalized memory
 		strncpy( input, argv[ 2 ], lenIn - 1);//get rid of the final '/'
 	}
-	else {
+	else { // the case where "dir" is entered
 		input = (char *) malloc( sizeof( char ) * (lenIn + 1) );
 		if ( input == NULL ) { //malloc error checking
 	        perror( "Call to malloc failed in main" );
@@ -26,9 +31,11 @@ int main( int argc, char *argv[] ) {
 	    }
 		strcpy( input, argv[ 2 ]);
 	}
+
+	/* read output parameter */
 	int lenOut = strlen( argv[ 3 ] );
 	char *output;
-	if (argv[ 3 ][ lenOut - 1 ] == '/') {
+	if (argv[ 3 ][ lenOut - 1 ] == '/') { //the case where "dir/" is entered (removes the /)
 		output = (char *) malloc( sizeof( char ) * lenOut );
 		if ( output == NULL ) { //malloc error checking
 	        perror( "Call to malloc failed in main" );
@@ -37,7 +44,7 @@ int main( int argc, char *argv[] ) {
 		output = (char *) memset( output, '\0', lenOut );//valgrind wouldn't shut up
 		strncpy( output, argv[ 3 ], lenOut - 1);//get rid of the final '/'
 	}
-	else {
+	else { // the case where "dir" is entered
 		output = (char *) malloc( sizeof( char ) * (lenOut + 1) );
 		if ( output == NULL ) { //malloc error checking
 	        perror( "Call to malloc failed in main" );
@@ -45,7 +52,10 @@ int main( int argc, char *argv[] ) {
 	    }
 		strcpy( output, argv[ 3 ]);
 	}
-	char *output_input = (char *) malloc( sizeof( char ) * (lenOut + 1 + lenIn + 1) );//output/input not output_input :p
+
+	/* build (true) output directory string */
+	int lenOutput_input = lenOut + 1 + lenIn;
+	char *output_input = (char *) malloc( sizeof( char ) * (lenOutput_input + 1) );//output/input not output_input :p
 	if ( output_input == NULL ) { //malloc error checking
 		perror( "Call to malloc failed in main" );
 		return -1;
@@ -55,7 +65,9 @@ int main( int argc, char *argv[] ) {
 	if(mkdir_r( output_input ) == -1)
 		return -1;
 
-	char *reportName = (char *) malloc( sizeof( char ) * (lenOut + 1 + lenIn + 11 + 1));//the final plus one is for \0
+	/* build report file */
+	//the +11 is the length of "_report.txt"
+	char *reportName = (char *) malloc( sizeof( char ) * (lenOutput_input + 11 + 1));//the final plus one is for \0
 	if ( reportName == NULL ) { //malloc error checking
 		perror( "Call to malloc failed in main" );
 		return -1;
@@ -65,27 +77,35 @@ int main( int argc, char *argv[] ) {
 	FILE *freport = fopen( reportName, "a+" );
 	free( output );
 
+	/* construct linked list of inodes */
 	inodeLL_t fileInodes = inodeLL_construct();
 
+	/* Do the actual recursion */
 	if (codeDir( input, output_input, isEncode, freport, fileInodes ) != 0) {
 		return -1;
 	}
 
+	/* cleanup */
 	inodeLL_destruct( fileInodes );
 	free( input );
 	free( output_input );
 
+	/* sort report file */
 	char *s = fqsort( freport );
+
+	/* further cleanup */
 	if (ferror ( freport )) {
 		perror("Error in handling of freport");
 		return -1;
 	}
 	fclose( freport );
+
+	/* finish sorting report file */
 	freport = fopen( reportName, "w+" );
 	fputs( s, freport );
 	free( s );
 	free( reportName );
-	if (ferror ( freport )) {
+	if (ferror( freport )) {
 		perror("Error in handling of freport");
 		return -1;
 	}
@@ -99,6 +119,7 @@ static int pstrcompare( const void *p1, const void *p2 ) { //static since only t
 }
 
 char *fqsort( FILE *f ) {
+	/* read all lines from f */
 	rewind( f );
 	char c = fgetc( f );
 	int numLine = 0;
@@ -110,7 +131,7 @@ char *fqsort( FILE *f ) {
 	}
 	rewind( f );
 
-	//read in lines from file
+	//read into lines from file
 	char **lines = (char **)malloc( sizeof( char * ) * numLine );
 	if ( lines == NULL ) { //malloc error checking
 		perror( "Call to malloc failed in fqsort" );
@@ -120,12 +141,12 @@ char *fqsort( FILE *f ) {
 	for (int i = 0; i < numLine; i++) {
 		char c = fgetc( f );
 		int lineLen = 1;
-		while (c != '\n' && c != EOF) {
+		while (c != '\n' && c != EOF) {//Not at EOL
 			c = fgetc( f );
 			lineLen++;
 		}
 		if (c == EOF) {
-			lineLen--; //include '\n' in line
+			lineLen--; //exclude EOF from the file
 		}
 		totalLen += lineLen;
 
@@ -134,11 +155,12 @@ char *fqsort( FILE *f ) {
 	        perror( "Call to malloc failed in fqsort" );
 	        exit ( EXIT_FAILURE );
 	    }
-		fseek( f, -lineLen , SEEK_CUR);
-		fgets( lines[ i ], lineLen + 1, f );
+		fseek( f, -lineLen , SEEK_CUR);//move back the # of characters in the line so we can accurately read them
+		fgets( lines[ i ], lineLen + 1, f );//1 for the null character
 	}
-	totalLen += 1;//1 for the EOF
+	totalLen += 1;//1 for the \0 character
 
+	/* sort, cleanup, and return */
 	qsort( lines, numLine, sizeof( char * ), pstrcompare );
 
 	char *retstr = (char *)malloc( sizeof( char ) * totalLen );
@@ -164,14 +186,15 @@ int codeDir( char *input, char *output, bool isEncode, FILE* report, inodeLL_t f
 	}
 	DIR *indir = opendir( input );
 
-	//TODO: further error checking (e.g. mkdir_r)
+	/* for each dir entry */
 	struct dirent *entry = readdir( indir );
 	while (entry != NULL) {
 		if ((strncmp( entry->d_name, ".", 1) == 0) || (strncmp( entry->d_name, "..", 2) == 0)) {
 			entry = readdir( indir );
-			continue;
+			continue;//skip '.' and '..'
 		}
 
+		/* build the input and output "file" strings */
 		char *inputFile = (char *) malloc( sizeof( char ) * (strlen( input ) + 1 + strlen( entry->d_name ) + 1));
 		if ( inputFile == NULL ) { //malloc error checking
 	        perror( "Call to malloc failed in codeDir" );
@@ -182,11 +205,12 @@ int codeDir( char *input, char *output, bool isEncode, FILE* report, inodeLL_t f
 	        perror( "Call to malloc failed in codeDir" );
 	        return -1;
 	    }
-		inputFile[ 0 ] = '\0';
+		inputFile[ 0 ] = '\0';//strcat concats onto the null
 		outputFile[ 0 ] = '\0';
 		strcat( strcat( strcat( inputFile, input ), "/" ), entry->d_name );
 		strcat( strcat( strcat( outputFile, output ), "/" ), entry->d_name );
 
+		/* determine filetype */
 		struct stat ebuf;
 		if (lstat( inputFile, &ebuf ) == -1) {
 			fprintf( stderr, "There was an error in reading information about %s/%s:\n\t%s\n", input, entry->d_name, strerror( errno ));
@@ -195,10 +219,12 @@ int codeDir( char *input, char *output, bool isEncode, FILE* report, inodeLL_t f
 
 		if (S_ISDIR( ebuf.st_mode )) {
 
-			if(mkdir_r( outputFile ) == -1)//in this case the "file" is specifically a dir
+			if(mkdir_r( outputFile ) == -1) {//in this case the "file" is specifically a dir
 				return -1;
-			if (codeDir( inputFile, outputFile, isEncode, report, fileInodes ) != 0)
+			}
+			if (codeDir( inputFile, outputFile, isEncode, report, fileInodes ) != 0) {
 				return -1;
+			}
 
 			//write to report
 			fprintf( report, "%s, directory, 0, 0\n", entry->d_name );
@@ -207,18 +233,18 @@ int codeDir( char *input, char *output, bool isEncode, FILE* report, inodeLL_t f
 			//write to report
 			fprintf( report, "%s, sym link, 0, 0\n", entry->d_name );
 		}
-		else {
+		else { //is hard link
 			FILE *in = fopen( inputFile, "r");
 		    struct stat inbuf;
 			stat( inputFile, &inbuf );
 			int inSize = (int)inbuf.st_size;
 			ino_t inInode = inbuf.st_ino;
-			if (inodeLL_search( fileInodes, inInode )) {//is duplicate hard link
+			if (inodeLL_search( fileInodes, inInode )) { //is duplicate hard link
 				//write to report
 				fprintf( report, "%s, hard link, 0, 0\n", entry->d_name );
 			}
-			else {//new uncoded file
-				inodeLL_append( fileInodes, inInode );
+			else { //new uncoded file (you can call it hard link)
+				inodeLL_append( fileInodes, inInode );//mark this inode as seen
 
 				FILE *out = fopen( outputFile, "w");
 				int outSize = 0;
@@ -230,7 +256,7 @@ int codeDir( char *input, char *output, bool isEncode, FILE* report, inodeLL_t f
 				}
 
 				if (ferror ( out )) {
-					perror("Error in handling of out");
+					perror("Error in handling of output file");
 					return -1;
 				}
 				fclose( out );
@@ -239,7 +265,7 @@ int codeDir( char *input, char *output, bool isEncode, FILE* report, inodeLL_t f
 				fprintf( report, "%s, regular file, %d, %d\n", entry->d_name, inSize, outSize );
 			}
 			if (ferror ( in )) {
-				perror("Error in handling of in");
+				perror("Error in handling of input file");
 				return -1;
 			}
 			fclose( in );
@@ -249,6 +275,7 @@ int codeDir( char *input, char *output, bool isEncode, FILE* report, inodeLL_t f
 		free( outputFile );
 		entry = readdir( indir );
 	}
+
 	closedir( indir );
 	return 0; //Nothing bad happened
 }
