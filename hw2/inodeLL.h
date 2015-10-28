@@ -9,8 +9,8 @@
 #include <stdio.h>
 
 typedef struct inodeLLNode {
-	ino_t inode;
-	struct inodeLLNode *next;
+    ino_t inode;
+    struct inodeLLNode *next;
 } inodeLLNode;
 typedef inodeLLNode* inodeLL_t;
 
