@@ -27,3 +27,15 @@ $ ./codec_4061 -d decodetest02 output
 
 What Exactly the Program Does
 ---------------------------------------
+At a high level this program will recursively read all of the files in a directory, and its
+subdirectories, decode or encode them, and then output them to an output directory in the
+same format as they were in the input directory. A report file is also generated in the output
+file describing the files encoded or decoded, and their sizes before and after. Soft links are
+ignored in this program, but there presence is noted in the report file. Duplicate hard links are
+also ignored in this program, but are also noted in the report file.
+
+Some of the specific uses of various files in our program are the following:
+codec_4061.c/h : main and a couple of helper functions
+codec.c/h : encode or decode a small block of bytes
+encode_decode.c/h : encode or decode a file
+inodeLL.c/h : a linked list for tracking the hard links' inodes
