@@ -95,9 +95,8 @@ int decode ( FILE *inFile, FILE *outFile, int inputSize ) {
     }
 
     while ( i < y ) {
-        decode_block( (uint8_t *) valid_in + i, (uint8_t *) out + j);
+        j += decode_block( (uint8_t *) valid_in + i, (uint8_t *) out + j);
         i = i + 4;
-        j = j + 3; //bytes written
     }
 
     fwrite( out, sizeof( char ), j, outFile );
