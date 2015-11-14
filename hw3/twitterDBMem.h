@@ -5,16 +5,20 @@
 /* This file implements the Data structure to store the twitter database */
 /* Currently it is an array, but the plan is to turn it into a hashtable */
 
-#include <stdbool.h>
+#ifndef TWITTERDBMEM_H_GUARD
+#define TWITTERDBMEM_H_GUARD
 
-struct TwitterDBMem {
+#include <stdbool.h>
+#include <stdio.h>
+
+typedef struct TwitterDBMem {
 	char **cities;//Array of strings (ordered by lines/potentially sorted)
 	char **keywords;//Array of strings
 	int numCities;
 	int numKeywords;
-};
+} TwitterDBMem;
 
-typedef struct TwitterDBMem* TwitterDBMem_t;
+typedef TwitterDBMem* TwitterDBMem_t;
 
 /* construct tdbm from FILE, int is for errors */
 int TwitterDBMem_construct(TwitterDBMem_t tdbm, FILE* twitterDB);
@@ -25,4 +29,6 @@ int TwitterDBMem_destruct(TwitterDBMem_t tdbm);
 /* points kwds to the city's keywords, or NULL if city does not exist. 
  * Returns false if city DNE, otherwise true. */
 bool TwitterDBMem_getCityKwd(TwitterDBMem_t tdbm, const char *city, char **kwds);
+
+#endif //TWITTERDBMEM_H_GUARD
 

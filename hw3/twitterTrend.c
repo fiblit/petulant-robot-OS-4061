@@ -5,7 +5,7 @@
 #include "twitterTrend.h"
 
 /* does initial processing, in particular, it starts the threads */
-int main( int argc, int *argv[] ) {
+int main( int argc, char *argv[] ) {
 	
 	return 0;
 }
