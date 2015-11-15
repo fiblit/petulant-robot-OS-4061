@@ -7,7 +7,7 @@
 
 /* construct q, int is for errors */
 queue_t queue_construct() {
-	queue_t q = (queue_t) malloc( sizeof( queue ) );
+	queue_t q = (queue_t) malloc( sizeof( queue_queue ) );
 	q->head = NULL;
 	q->tail = NULL;
 	q->size = 0;

@@ -21,9 +21,9 @@ typedef struct queue {
 	queueNode_t head;
 	queueNode_t tail;
 	int size;
-} queue;
+} queue_queue;
 
-typedef queue* queue_t;
+typedef queue_queue* queue_t;
 
 /* construct a queue_t */
 queue_t queue_construct();

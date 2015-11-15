@@ -10,16 +10,28 @@
 #define TWITTERTREND_H_GUARD
 
 #include <stdio.h>
+#include <pthread.h>
+#include <semaphore.h>
 
 #include "twitterDBMem.h"
 #include "queue.h"
 
 #define TWITTERDB_FILENAME "TwitterDB.txt"
 
-/*
- * <insert global variables> which I did not really spend time making declarations about
- * (there are definitely a few semaphores here)
- */
+/* global variables */
+sem_t full;
+sem_t empty;
+sem_t mut;
+queue_t queue;
+TwitterDBMem_t tdbm;
+FILE *inFile;
+/* <insert global variables> */
+
+/* Reads TwitterDB.txt into the tdbm struct */
+void readTwitterDB();
+
+/* opens/validates *.in file */
+void openInFile(char *inFile);
 
 /* a thread which processes clients/items on the queue
  * args is nothing AFAIK (global "arguments")
@@ -30,15 +42,6 @@ void *processer( void *args );
  * args is nothing AFAIK (global "arguments")
  * returns pointer to int (error) */
 void *queueer( void *args );
-
-/* Reads TwitterDB.txt into the tdbm struct
- * returns int for any errors */
-int readTwitterDB();
-
-/* reads input arguments, and processes them into a form to be fed to the program 
- * returns int for any errors 
- * NOTE: May or may not actually be implemented... (It might be easier to just be in main) */
-int readInputArguments( int argc, char *argv[] );
 
 #endif //TWITTERTREND_H_GUARD
 
