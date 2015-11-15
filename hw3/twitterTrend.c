@@ -38,23 +38,35 @@ int main( int argc, char *argv[] ) {
 	/* make and run threads */
 	pthread_t *processerThreads = (pthread_t *) malloc( sizeof( pthread_t ) * num_threads );
 	pthread_t queueerThread;
-	int id;
+	int id;//TODO: fix ID bug, the problem is that the address at which id is stored gets overwritten before the processer thread can access it.
 	for (id = 0; id < num_threads; id++) {
 		if (pthread_create( &processerThreads[ id ], NULL, processer, &id) != 0 ) {
 			fprintf( stderr, "Failed to create processer thread, ID:%d : %s\n", id, strerror( errno ) );
 		}
+		else {
+			fprintf( stderr, "Created thread %d\n", id );
+		}
 	}
 	if (pthread_create( &queueerThread, NULL, queueer, &id) != 0 ) {
-		fprintf( stderr, "Failed to create queueer thread, ID:%d : %s\n", id, strerror( errno ) );
+		fprintf( stderr, "Failed to create queueer thread, ID:%d : queueer : %s\n", num_threads, strerror( errno ) );
+	}
+	else {
+		fprintf( stderr, "Created thread %d : queueer\n", num_threads );
 	}
 
 	/* join threads */
 	if (pthread_join( queueerThread, NULL ) != 0) {
-		fprintf( stderr, "Failed to join queueer thread, ID:%d : %s\n", id, strerror( errno ) );
+		fprintf( stderr, "Failed to join queueer thread, ID:%d : %s\n", num_threads, strerror( errno ) );
+	}
+	else {
+		fprintf( stderr, "Joined thread %d : queueer\n", num_threads);
 	}
 	for (id = 0; id < num_threads; id++) {
 		if (pthread_join( processerThreads[ id ], NULL) != 0) {
 			fprintf( stderr, "Failed to join processer thread, ID:%d : %s\n", id, strerror( errno ) );
+		}
+		else {
+			fprintf( stderr, "Joined thread %d\n", id);
 		}
 	}
 
