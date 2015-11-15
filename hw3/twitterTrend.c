@@ -20,10 +20,28 @@ int main( int argc, char *argv[] ) {
 	readTwitterDB();
 	queue = queue_construct();
 
-	for (int id = 0; id < num_threads; id++);
 	/* make and run threads */
+	pthread_t *processerThreads = (pthread_t *) malloc( sizeof( pthread_t ) * num_threads );
+	pthread_t queueerThread;
+	int id;
+	for (id = 0; id < num_threads; id++) {
+		if (pthread_create( &processerThreads[ id ], NULL, processer, &id) != 0 ) {
+			fprintf( stderr, "Failed to create processer thread, ID:%d : %s", id, strerror( errno ) );
+		}
+	}
+	if (pthread_create( &queueerThread, NULL, queueer, &id) != 0 ) {
+		fprintf( stderr, "Failed to create queueer thread, ID:%d : %s", id, strerror( errno ) );
+	}
 
 	/* join threads */
+	if (pthread_join( queueerThread, NULL ) != 0) {
+		fprintf( stderr, "Failed to join queueer thread, ID:%d : %s", id, strerror( errno ) );
+	}
+	for (id = 0; id < num_threads; id++) {
+		if (pthread_join( processerThreads[ id ], NULL) != 0) {
+			fprintf( stderr, "Failed to join processer thread, ID:%d : %s", id, strerror( errno ) );
+		}
+	}
 
 	fclose( inFile );
 	TwitterDBMem_destruct( tdbm );
