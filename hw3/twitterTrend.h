@@ -18,10 +18,11 @@
 #include "queue.h"
 
 #define TWITTERDB_FILENAME "TwitterDB.txt"
+#define MAXCITYNAMELENGTH 15
 
 /* global variables */
-sem_t full;
-sem_t empty;
+sem_t full_slots;
+sem_t empty_slots;
 sem_t mut;
 queue_t queue;
 TwitterDBMem_t tdbm;

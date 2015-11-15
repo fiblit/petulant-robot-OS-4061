@@ -45,20 +45,37 @@ void queue_enqueue( queue_t q, char *item ) {
 	queueNode_t qn = queueNode_construct();
 	qn->item = (char *) malloc( sizeof( char ) * strlen( item ) );
 	strcpy( qn->item, item );
-	
-	q->tail->next = qn;
+	if (q->head == NULL) {
+		q->head = qn;
+		q->tail = qn;
+	}
+	else {
+		q->tail->next = qn;
+	}
+	q->size++;
 }
 
 /* returns item from the head of q and removes the item from head of q */
 char *queue_dequeue( queue_t q ) {
-	queueNode_t head = q->head;
-	q->head = q->head->next;
-
-	char *ret = (char *) malloc( sizeof( char ) * strlen( head->item ) );
-	strcpy( ret, q->head->item );
 	
-	queueNode_destruct( head );
+	if (q->head != NULL) {
+		queueNode_t head = q->head;
+		if (q->head->next == NULL) {
+			q->tail = NULL;
+		}
+		q->head = q->head->next;
 
-	return ret;
+		char *ret = (char *) malloc( sizeof( char ) * strlen( head->item ) );
+		strcpy( ret, q->head->item );
+	
+		queueNode_destruct( head );
+		q->size--;
+
+		return ret;
+	}
+	else {
+		perror( "Attempted to dequeue an empty queue" );
+		exit( EXIT_FAILURE );//TODO: return/check for errno so we can print the culprit thread
+	}
 }
 
