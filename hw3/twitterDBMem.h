@@ -10,12 +10,12 @@
 
 #include <stdbool.h>
 #include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
 
 typedef struct TwitterDBMem {
-	char **cities;//Array of strings (ordered by lines/potentially sorted)
-	char **keywords;//Array of strings
-	int numCities;
-	int numKeywords;
+	char **lines;//Array of strings (lines, potentially sorted)
+	int numLines;
 } TwitterDBMem;
 
 typedef TwitterDBMem* TwitterDBMem_t;
@@ -23,12 +23,12 @@ typedef TwitterDBMem* TwitterDBMem_t;
 /* construct a TwitterDBMem from FILE */
 TwitterDBMem_t TwitterDBMem_construct(FILE* twitterDB);
 
-/* destruct tdbm, int is for errors */
-int TwitterDBMem_destruct(TwitterDBMem_t tdbm);
+/* destruct tdbm */
+void TwitterDBMem_destruct(TwitterDBMem_t tdbm);
 
-/* points kwds to the city's keywords, or NULL if city does not exist. 
+/* points cline to the city's line, or NULL if city does not exist. 
  * Returns false if city DNE, otherwise true. */
-bool TwitterDBMem_getCityKwd(TwitterDBMem_t tdbm, const char *city, char **kwds);
+bool TwitterDBMem_getCityKwd(TwitterDBMem_t tdbm, const char *city, char **cline);
 
 #endif //TWITTERDBMEM_H_GUARD
 
