@@ -20,8 +20,8 @@ typedef struct TwitterDBMem {
 
 typedef TwitterDBMem* TwitterDBMem_t;
 
-/* construct tdbm from FILE, int is for errors */
-int TwitterDBMem_construct(TwitterDBMem_t tdbm, FILE* twitterDB);
+/* construct a TwitterDBMem from FILE */
+TwitterDBMem_t TwitterDBMem_construct(FILE* twitterDB);
 
 /* destruct tdbm, int is for errors */
 int TwitterDBMem_destruct(TwitterDBMem_t tdbm);

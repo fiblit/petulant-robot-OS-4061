@@ -6,6 +6,9 @@
 /* NOTE: We may want to move the threads to a different file, I just thought this would
  * be convenient */
 
+#ifndef TWITTERTREND_H_GUARD
+#define TWITTERTREND_H_GUARD
+
 #include <stdio.h>
 
 #include "twitterDBMem.h"
@@ -36,4 +39,6 @@ int readTwitterDB();
  * returns int for any errors 
  * NOTE: May or may not actually be implemented... (It might be easier to just be in main) */
 int readInputArguments( int argc, char *argv[] );
+
+#endif //TWITTERTREND_H_GUARD
 

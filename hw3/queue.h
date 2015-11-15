@@ -3,25 +3,45 @@
 * id: hildr039, kohnx074 */
 
 /* This file implements the thinly disguised Linked-List a.k.a. queue  */
-struct queueNode {
+
+#ifndef QUEUE_H_GUARD
+#define QUEUE_H_GUARD
+
+#include <stdlib.h>
+#include <string.h>
+
+typedef struct queueNode {
 	struct queueNode *next;
 	char *item;
-};
+} queueNode;
+
+typedef queueNode* queueNode_t;
 
 typedef struct queue {
-	struct queueNode *head;
-	struct queueNode *tail;
+	queueNode_t head;
+	queueNode_t tail;
 	int size;
 } queue;
 
 typedef queue* queue_t;
 
-/* adds item to the tail of the queue
- * returns int for any error */
-int enqueue( queue_t q, char *item );
+/* construct a queue_t */
+queue_t queue_construct();
 
-/* places front item into ret,
- * returns int for any error
- * NOTE: change return type to char* if there are no possible errors */
-int dequeue( queue_t q, char **ret );
+/* destruct q */
+void queue_destruct( queue_t q );
+
+/* construct a queueNode_t */
+queueNode_t queueNode_construct();
+
+/* destruct qn */
+void queueNode_destruct( queueNode_t qn );
+
+/* adds item to the tail of the queue */
+void queue_enqueue( queue_t q, char *item );
+
+/* returns item from the head of q and removes the item from head of q */
+char *queue_dequeue( queue_t q );
+
+#endif //QUEUE_H_GUARD
 
