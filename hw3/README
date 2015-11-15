@@ -5,8 +5,8 @@
 Outline (for us programmers):
 "main":
 	mkQueue on heap (could be after RDINPUT, if we do EC. I think.)
-	RDINPUT
 	mkDBMemStruct on heap
+	RDINPUT
 	mk & run threads -> see "PROCESSER" & "QUEUER"
 
 "RDINPUT": (may or may not actually be a function)
