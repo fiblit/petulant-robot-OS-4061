@@ -12,13 +12,13 @@ LDFLAGS = -pthread
 all: twitterTrend
 
 twitterTrend: twitterTrend.o queue.o twitterDBMem.o
-	$(CC) $(LDFLAGS) -o $@ $^
+	$(CC) $(LDFLAGS) -o $@ $^ 
 twitterTrend.o: twitterTrend.c twitterTrend.h twitterDBMem.h queue.h
-	$(CC) $(COPT) $<
+	$(CC) $(CFLAGS) $<
 twitterDBMem.o: twitterDBMem.c twitterDBMem.h
-	$(CC) $(COPT) $<
+	$(CC) $(CFLAGS) $<
 queue.o: queue.c queue.h
-	$(CC) $(COPT) $<
+	$(CC) $(CFLAGS) $<
 
 clean:
 	rm -f *.o twitterTrend
