@@ -106,6 +106,8 @@ void *processer( void *args ) {
 	char *cityLine = ( char * ) malloc ( sizeof ( char ) * 100 ); //every line in TwitterDB is less than 100 characters
 	char *lineAfterCityName = ( char * ) malloc ( sizeof ( char ) * 85 ); //will be contents of cityLine after the cityName
 	char *processerFileName = ( char * ) malloc ( sizeof ( char ) * 100); //should be big enough for the name "clientX.txt"
+	char *originalFileName = ( char * ) malloc ( sizeof ( char ) * 100); //should be big enough for the name "clientX.txt"
+
 
 	while (1) {
 
@@ -127,7 +129,8 @@ void *processer( void *args ) {
 			exit( EXIT_FAILURE );
 		}
 
-;		//TODO: add print statements about thread working
+;		printf( "Thread %d is handling client %s\n", id, processerFileName );
+
 		//open file to get city name
 		cityFile = fopen ( processerFileName, "r" );
 		fread ( cityBuf, sizeof ( char ), MAXCITYNAMELENGTH, cityFile );
@@ -148,6 +151,7 @@ void *processer( void *args ) {
 		strncpy ( lineAfterCityName, cityLine + cityLength + 1, ( 100 - cityLength )); //+1 for the extra comma
 
 		//create result file
+		originalFileName = processerFileName;
 		strcat( processerFileName, ".result" ); //create name of result file
 		resultFile = fopen ( processerFileName, "a+" ); //a+ mode will create the file
 
@@ -160,6 +164,8 @@ void *processer( void *args ) {
 		fwrite ( lineAfterCityName, sizeof ( char ), lineAfterCityNameLength, resultFile );
 		fputc ( '\n', resultFile );
 		fclose ( resultFile );
+
+		printf( "Thread %d is finished handling client %s\n", id, originalFileName );
 
 		fprintf( stderr, "1:Hi! I am ID:%d\n", id);
 
