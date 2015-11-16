@@ -95,6 +95,7 @@ void *processer( void *args ) {
 	int id = *((int *) args);
 	int cityLength;
 	int lineAfterCityNameLength;
+	int lastCharOfCity;
 	FILE *cityFile;
 	FILE *resultFile;
 	char *cityBuf = ( char * ) malloc ( sizeof ( char ) * 16 ); //cityNames will be less than 15 characters
@@ -125,8 +126,13 @@ void *processer( void *args ) {
 ;		//TODO: add print statements about thread working
 		//open file to get city name
 		cityFile = fopen ( processerFileName, "r" );
-		fread ( cityBuf, sizeof ( char ), 1, cityFile );
+		fread ( cityBuf, sizeof ( char ), MAXCITYNAMELENGTH, cityFile );
 		fclose ( cityFile );
+		lastCharOfCity = strlen( cityBuf );
+		if (cityBuf[ lastCharOfCity - 1 ] == '\n') {
+			cityBuf[ lastCharOfCity - 1 ] = '\0';
+		}
+
 
 		//will stick the city's line in cityLine if it exists
 		cityLine = TwitterDBMem_getCityKwd( tdbm, cityBuf );
@@ -134,8 +140,8 @@ void *processer( void *args ) {
 			fprintf ( stderr, "City %s does not exist", cityBuf );
 		}
 		cityLength = strlen ( cityBuf );
-		printf( "Length of city %s is %d\n", cityBuf, cityLength ); //testing printf
-		strncpy ( lineAfterCityName, cityLine + cityLength, ( 100 - cityLength )); //Need to test
+		//printf( "Length of city %s is %d\n", cityBuf, cityLength ); //testing printf
+		strncpy ( lineAfterCityName, cityLine + cityLength + 1, ( 100 - cityLength )); //+1 for the extra comma
 
 		//create result file
 		strcat( processerFileName, ".result" ); //create name of result file
