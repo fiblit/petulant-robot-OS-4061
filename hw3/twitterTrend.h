@@ -27,7 +27,7 @@ sem_t mut;
 queue_t queue;
 TwitterDBMem_t tdbm;
 FILE *inFile;
-bool globalQueue; 
+bool globalQueue;
 /* <insert global variables> */
 
 /* Reads TwitterDB.txt into the tdbm struct */

@@ -110,9 +110,12 @@ void *processer( void *args ) {
 	char *processerFileName = ( char * ) malloc ( sizeof ( char ) * 100); //should be big enough for the name "clientX.txt"
 	char *originalFileName = ( char * ) malloc ( sizeof ( char ) * 100); //should be big enough for the name "clientX.txt"
 
-	sem_getvalue ( &full_slots, &semValue );
-	while (! (globalQueue && semValue) ) { //test if the queue has anything in it
+	while ( 1 ) { //test if the queue has anything in it
 
+		sem_getvalue ( &full_slots, &semValue );
+		if ( globalQueue && ( semValue == 0) ) {
+			break;
+		}
 		//keep dequeueing until we break
 		if ( sem_wait ( &full_slots ) != 0 ) {
 			perror( "Error occured while processer was waiting" );
@@ -176,8 +179,6 @@ void *processer( void *args ) {
 			perror( "Error occured while posting to a semaphore" );
 			exit( EXIT_FAILURE );
 		}
-
-		sem_getvalue ( &full_slots, &semValue ); //to keep while loop updated
 
 		fprintf( stderr, "2:Hi! I am ID:%d\n", id);
 	}
