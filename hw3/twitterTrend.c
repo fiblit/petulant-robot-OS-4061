@@ -97,7 +97,7 @@ void *processer( void *args ) {
 	int lineAfterCityNameLength;
 	FILE *cityFile;
 	FILE *resultFile;
-	char cityBuf = ( char * ) malloc ( sizeof ( char ) * 16 ); //cityNames will be less than 15 characters
+	char *cityBuf = ( char * ) malloc ( sizeof ( char ) * 16 ); //cityNames will be less than 15 characters
 	char *cityLine = ( char * ) malloc ( sizeof ( char ) * 100 ); //every line in TwitterDB is less than 100 characters
 	char *lineAfterCityName = ( char * ) malloc ( sizeof ( char ) * 85 ); //will be contents of cityLine after the cityName
 	char *processerFileName = ( char * ) malloc ( sizeof ( char ) * 100); //should be big enough for the name "clientX.txt"
@@ -203,6 +203,12 @@ void *queueer( void *args ) {
 		}
 
 		//TODO: <insert semaphore post to inFile>
+
+		//delete \n char
+		int newItemLen = strlen( newItem );
+		if (newItem[ newItemLen - 1 ] == '\n') {
+			newItem[ newItemLen - 1 ] = '\0';
+		}
 
 		//Lock access to queue
 		if (sem_wait( &mut ) != 0 ) {//TODO: turn these validators into functions
