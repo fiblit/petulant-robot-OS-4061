@@ -112,13 +112,13 @@ void *processer( void *args ) {
 
 	while ( 1 ) { //test if the queue has anything in it
 
-		sem_getvalue ( &full_slots, &semValue );	
 		//keep dequeueing until we break
 		if ( sem_wait ( &full_slots ) != 0 ) {
 			perror( "Error occured while processer was waiting" );
 		}
 
-		if ( globalQueue ) {
+		sem_getvalue ( &full_slots, &semValue );	
+		if ( globalQueue && (semValue == 0) ) {
 
 			//continue ending threads
 			if (sem_post( &full_slots ) != 0 ) {
@@ -145,7 +145,7 @@ void *processer( void *args ) {
 
 		//open file to get city name
 		cityFile = fopen ( processerFileName, "r" );
-		fread ( cityBuf, sizeof ( char ), MAXCITYNAMELENGTH, cityFile );
+		fgets ( cityBuf, MAXCITYNAMELENGTH, cityFile );
 		fclose ( cityFile );
 		lastCharOfCity = strlen( cityBuf );
 		if (cityBuf[ lastCharOfCity - 1 ] == '\n') {

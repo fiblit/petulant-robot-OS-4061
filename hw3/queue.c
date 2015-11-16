@@ -51,6 +51,7 @@ void queue_enqueue( queue_t q, char *item ) {
 	}
 	else {
 		q->tail->next = qn;
+		q->tail = qn;
 	}
 	q->size++;
 }
@@ -81,7 +82,7 @@ char *queue_dequeue( queue_t q ) {
 		return ret;
 	}
 	else {
-		perror( "Attempted to dequeue an empty queue" );
+		fprintf( stderr, "Attempted to dequeue an empty queue\n" );
 		exit( EXIT_FAILURE );//TODO: return/check for errno so we can print the culprit thread
 	}
 }
