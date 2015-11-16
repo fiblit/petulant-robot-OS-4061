@@ -20,6 +20,7 @@ int main( int argc, char *argv[] ) {
 	openInFile( inFileName );
 	readTwitterDB();
 	queue = queue_construct();
+	globalQueue = false;
 
 	/* init semaphores */
 	if (sem_init(&full_slots, 0, 0) != 0) {
@@ -110,7 +111,7 @@ void *processer( void *args ) {
 	char *originalFileName = ( char * ) malloc ( sizeof ( char ) * 100); //should be big enough for the name "clientX.txt"
 
 	sem_getvalue ( &full_slots, &semValue );
-	while (globalQueue && semValue ) { //test if the queue has anything in it
+	while (! (globalQueue && semValue) ) { //test if the queue has anything in it
 
 		//keep dequeueing until we break
 		if ( sem_wait ( &full_slots ) != 0 ) {
@@ -218,7 +219,7 @@ void *queueer( void *args ) {
 				perror( "Error occured while releasing semaphore lock" );
 				exit( EXIT_FAILURE );
 			}
-			globalQueue = false;
+			globalQueue = true;
 			break;//no more items to add
 		}
 
