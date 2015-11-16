@@ -59,16 +59,23 @@ void queue_enqueue( queue_t q, char *item ) {
 char *queue_dequeue( queue_t q ) {
 	
 	if (q->head != NULL) {
-		queueNode_t head = q->head;
+		
+		/* get old head */
+		queueNode_t oldHead = q->head;
+
+		/* get retval */
+		char *ret = (char *) malloc( sizeof( char ) * strlen( q->head->item ) );
+		strcpy( ret, q->head->item );
+		
+		/* move head forward */
 		if (q->head->next == NULL) {
 			q->tail = NULL;
 		}
 		q->head = q->head->next;
 
-		char *ret = (char *) malloc( sizeof( char ) * strlen( head->item ) );
-		strcpy( ret, q->head->item );
-	
-		queueNode_destruct( head );
+		/* kill old head */
+		oldHead->next = NULL;
+		queueNode_destruct( oldHead );
 		q->size--;
 
 		return ret;
