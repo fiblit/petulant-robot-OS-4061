@@ -27,6 +27,7 @@ sem_t mut;
 queue_t queue;
 TwitterDBMem_t tdbm;
 FILE *inFile;
+bool globalQueue = true; 
 /* <insert global variables> */
 
 /* Reads TwitterDB.txt into the tdbm struct */
@@ -46,4 +47,3 @@ void *processer( void *args );
 void *queueer( void *args );
 
 #endif //TWITTERTREND_H_GUARD
-
