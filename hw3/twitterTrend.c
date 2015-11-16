@@ -38,9 +38,13 @@ int main( int argc, char *argv[] ) {
 	/* make and run threads */
 	pthread_t *processerThreads = (pthread_t *) malloc( sizeof( pthread_t ) * num_threads );
 	pthread_t queueerThread;
-	int id;//TODO: fix ID bug, the problem is that the address at which id is stored gets overwritten before the processer thread can access it.
+	int *ids = (int *) malloc( sizeof( int ) * num_threads );
+	for (int i = 0; i < num_threads; i++) {
+		ids[ i ] = i;
+	}
+	int id;
 	for (id = 0; id < num_threads; id++) {
-		if (pthread_create( &processerThreads[ id ], NULL, processer, &id) != 0 ) {
+		if (pthread_create( &processerThreads[ id ], NULL, processer, &ids[ id ]) != 0 ) {
 			fprintf( stderr, "Failed to create processer thread, ID:%d : %s\n", id, strerror( errno ) );
 		}
 		else {
