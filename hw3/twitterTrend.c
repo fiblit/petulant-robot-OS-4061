@@ -6,14 +6,14 @@
 
 /* does initial processing, in particular, it starts the threads */
 int main( int argc, char *argv[] ) {
-	
+
 	/* get args */
 	if (argc != 3) {
 		fprintf( stderr, "Incorrect usage.\n" );
 		fprintf( stderr, "\tUsage: %s <*.in file> <num_threads>\n", argv[ 0 ] );
 		return 1;
 	}
-	char *inFileName = argv[ 1 ];	
+	char *inFileName = argv[ 1 ];
 	int num_threads = atoi( argv[ 2 ] );
 
 	/* init data structures */
@@ -28,7 +28,7 @@ int main( int argc, char *argv[] ) {
 	}
 	if (sem_init(&empty_slots, 0, num_threads) != 0) {//the buffer/queue is bounded by num_threads
 		perror( "Semaphore initialization failed" );
-		return 1;	
+		return 1;
 	}
 	if (sem_init(&mut, 0, 1) != 0) {
 		perror( "Semaphore initialization failed" );
@@ -79,7 +79,7 @@ int main( int argc, char *argv[] ) {
 
 void readTwitterDB() {
 	FILE *twitterFile = fopen( TWITTERDB_FILENAME, "r" );
-	tdbm = TwitterDBMem_construct( twitterFile );	
+	tdbm = TwitterDBMem_construct( twitterFile );
 	fclose( twitterFile );
 }
 
@@ -87,22 +87,84 @@ void openInFile(char *inFileName) {
 	inFile = fopen( inFileName, "r" );
 	if (inFile == NULL) {
 		perror( "Failed to open *.in file" );
-		exit( EXIT_FAILURE );	
+		exit( EXIT_FAILURE );
 	}
 }
 
 void *processer( void *args ) {
 	int id = *((int *) args);
-	
-	/* stuff goes here */
-	fprintf( stderr, "Hi! I am ID:%d\n", id);
+	int cityLength;
+	int lineAfterCityNameLength;
+	char *cityBuf = ( char * ) malloc ( sizeof ( char ) * 16 ); //cityNames will be less than 15 characters
+	char *cityLine = ( char * ) malloc ( sizeof ( char ) * 100 ); //every line in TwitterDB is less than 100 characters
+	char *lineAfterCityName = ( char * ) malloc ( sizeof ( char ) * 85 ); //will be contents of cityLine after the cityName
+
+	while (1) {
+
+		//keep dequeueing until we break (??)
+		if ( sem_wait ( &full_slots ) != 0 ) {
+			perror( "Error occured while processer was waiting" );
+		}
+		//lock access to queue
+		if (sem_wait( &mut ) != 0) {
+			perror( "Error occured while waiting for semaphore lock" );
+			exit( EXIT_FAILURE );
+		}
+
+		char *processerFileName = queue_dequeue ( queue ); //store the file name of the client
+
+		//release access to queue
+		if (sem_post( &mut ) != 0) {
+			perror( "Error occured while releasing semaphore lock" );
+			exit( EXIT_FAILURE );
+		}
+
+		//TODO: add print statements about thread working
+		//open file to get city name
+		FILE *cityFile = fopen ( processerFileName, "r" );
+		fread ( cityBuf, sizeof ( char ), 1, cityFile );
+		fclose ( cityFile );
+
+		//will stick the city's line in cityLine if it exists
+		cityLine = TwitterDBMem_getCityKwd( tdbm, cityBuf );
+		if ( !( cityLine ) ) {
+			fprintf ( stderr, "City %s does not exist", cityBuf );
+		}
+		cityLength = strlen ( cityBuf );
+		printf( "Length of city %s is %d\n", cityBuf, cityLength ); //testing printf
+		strncpy ( lineAfterCityName, cityLine + cityLength, ( 100 - cityLength )); //Need to test
+
+		//create result file
+		strcat( processerFileName, ".result" ); //create name of result file
+		FILE *resultFile = fopen ( processerFileName, "a+" ); //a+ mode will create the file
+
+		//write the city name, then put the : and two spaces in, then put the lineAfterCityName in, then add \n
+		lineAfterCityNameLength = strlen ( lineAfterCityName );
+		fwrite ( cityBuf, sizeof ( char ), cityLength, resultFile );
+		fputc ( ' ', resultFile );
+		fputc ( ':', resultFile );
+		fputc ( ' ', resultFile );
+		fwrite ( lineAfterCityName, sizeof ( char ), lineAfterCityNameLength, resultFile );
+		fputc ( '\n', resultFile );
+		fclose ( resultFile );
+
+		fprintf( stderr, "Hi! I am ID:%d\n", id);
+
+		//post that there is another empty slot
+		if (sem_post( &empty_slots ) != 0) {
+			perror( "Error occured while posting to a semaphore" );
+			exit( EXIT_FAILURE );
+		}
+
+		fprintf( stderr, "Hi! I am ID:%d\n", id);
+	}
 
 	return NULL;
 }
 
 void *queueer( void *args ) {
 	int id = *((int *) args);
-	
+
 	//Keep enqueueing until we break from having no more items
 	while ( 1 ) {
 
@@ -120,7 +182,7 @@ void *queueer( void *args ) {
 				exit( EXIT_FAILURE );
 			}
 		}
-		
+
 		// TODO: <insert semaphore wait to inFile>
 
 		/* put next item on queue */
@@ -128,7 +190,7 @@ void *queueer( void *args ) {
 
 		//get next line or EOF
 		if (fgets( newItem, MAXCITYNAMELENGTH + 1, inFile ) == NULL) {
-			
+
 			//release access to queue
 			if (sem_post( &mut ) != 0) {
 				perror( "Error occured while releasing semaphore lock" );
@@ -146,7 +208,7 @@ void *queueer( void *args ) {
 		}
 		queue_enqueue( queue, newItem );
 
-		//release access to queue	
+		//release access to queue
 		if (sem_post( &mut ) != 0) {
 			perror( "Error occured while releasing semaphore lock" );
 			exit( EXIT_FAILURE );
@@ -158,8 +220,7 @@ void *queueer( void *args ) {
 			exit( EXIT_FAILURE );
 		}
 
-	} 
+	}
 
 	return NULL;//Nothing to return
 }
-
