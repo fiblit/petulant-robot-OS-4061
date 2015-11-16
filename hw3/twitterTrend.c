@@ -117,7 +117,7 @@ void *processer( void *args ) {
 			perror( "Error occured while processer was waiting" );
 		}
 
-		sem_getvalue ( &full_slots, &semValue );	
+		sem_getvalue ( &full_slots, &semValue );
 		if ( globalQueue && (semValue == 0) ) {
 
 			//continue ending threads
@@ -141,6 +141,7 @@ void *processer( void *args ) {
 			exit( EXIT_FAILURE );
 		}
 
+		strcpy ( originalFileName, processerFileName ); //to makesure finished message outputs correctly
 ;		printf( "Thread %d is handling client %s\n", id, processerFileName );
 
 		//open file to get city name
@@ -163,7 +164,6 @@ void *processer( void *args ) {
 		strncpy ( lineAfterCityName, cityLine + cityLength + 1, ( 100 - cityLength )); //+1 for the extra comma
 
 		//create result file
-		originalFileName = processerFileName;
 		strcat( processerFileName, ".result" ); //create name of result file
 		resultFile = fopen ( processerFileName, "a+" ); //a+ mode will create the file
 
@@ -224,7 +224,7 @@ void *queueer( void *args ) {
 				perror( "Error occured while releasing semaphore lock" );
 				exit( EXIT_FAILURE );
 			}
-		
+
 			//this is a nasty hack
 			if ( sem_post( &full_slots ) != 0 ) {
 				perror( "Error occurred while posting to a semaphore" );
