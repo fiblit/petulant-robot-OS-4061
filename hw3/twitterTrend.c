@@ -95,9 +95,12 @@ void *processer( void *args ) {
 	int id = *((int *) args);
 	int cityLength;
 	int lineAfterCityNameLength;
-	char *cityBuf = ( char * ) malloc ( sizeof ( char ) * 16 ); //cityNames will be less than 15 characters
+	FILE *cityFile;
+	FILE *resultFile;
+	char cityBuf = ( char * ) malloc ( sizeof ( char ) * 16 ); //cityNames will be less than 15 characters
 	char *cityLine = ( char * ) malloc ( sizeof ( char ) * 100 ); //every line in TwitterDB is less than 100 characters
 	char *lineAfterCityName = ( char * ) malloc ( sizeof ( char ) * 85 ); //will be contents of cityLine after the cityName
+	char *processerFileName = ( char * ) malloc ( sizeof ( char ) * 100); //should be big enough for the name "clientX.txt"
 
 	while (1) {
 
@@ -111,7 +114,7 @@ void *processer( void *args ) {
 			exit( EXIT_FAILURE );
 		}
 
-		char *processerFileName = queue_dequeue ( queue ); //store the file name of the client
+		processerFileName = queue_dequeue ( queue ); //store the file name of the client
 
 		//release access to queue
 		if (sem_post( &mut ) != 0) {
@@ -119,9 +122,9 @@ void *processer( void *args ) {
 			exit( EXIT_FAILURE );
 		}
 
-		//TODO: add print statements about thread working
+;		//TODO: add print statements about thread working
 		//open file to get city name
-		FILE *cityFile = fopen ( processerFileName, "r" );
+		cityFile = fopen ( processerFileName, "r" );
 		fread ( cityBuf, sizeof ( char ), 1, cityFile );
 		fclose ( cityFile );
 
@@ -136,7 +139,7 @@ void *processer( void *args ) {
 
 		//create result file
 		strcat( processerFileName, ".result" ); //create name of result file
-		FILE *resultFile = fopen ( processerFileName, "a+" ); //a+ mode will create the file
+		resultFile = fopen ( processerFileName, "a+" ); //a+ mode will create the file
 
 		//write the city name, then put the : and two spaces in, then put the lineAfterCityName in, then add \n
 		lineAfterCityNameLength = strlen ( lineAfterCityName );
