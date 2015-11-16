@@ -38,39 +38,39 @@ int main( int argc, char *argv[] ) {
 	/* make and run threads */
 	pthread_t *processerThreads = (pthread_t *) malloc( sizeof( pthread_t ) * num_threads );
 	pthread_t queueerThread;
-	int *ids = (int *) malloc( sizeof( int ) * num_threads );
-	for (int i = 0; i < num_threads; i++) {
-		ids[ i ] = i;
+	int *ids = (int *) malloc( sizeof( int ) * (num_threads + 1) );
+	for (int i = 0; i < num_threads + 1; i++) {
+		ids[ i ] = i + 1;
 	}
 	int id;
 	for (id = 0; id < num_threads; id++) {
 		if (pthread_create( &processerThreads[ id ], NULL, processer, &ids[ id ]) != 0 ) {
-			fprintf( stderr, "Failed to create processer thread, ID:%d : %s\n", id, strerror( errno ) );
+			fprintf( stderr, "Failed to create processer thread, ID:%d : %s\n", ids[ id ], strerror( errno ) );
 		}
 		else {
-			fprintf( stderr, "Created thread %d\n", id );
+			fprintf( stderr, "Created thread %d\n", ids[ id ] );
 		}
 	}
-	if (pthread_create( &queueerThread, NULL, queueer, &id) != 0 ) {
-		fprintf( stderr, "Failed to create queueer thread, ID:%d : queueer : %s\n", num_threads, strerror( errno ) );
+	if (pthread_create( &queueerThread, NULL, queueer, &ids[ id ]) != 0 ) {
+		fprintf( stderr, "Failed to create queueer thread, ID:%d : queueer : %s\n", num_threads + 1, strerror( errno ) );
 	}
 	else {
-		fprintf( stderr, "Created thread %d : queueer\n", num_threads );
+		fprintf( stderr, "Created thread %d : queueer\n", num_threads + 1);
 	}
 
 	/* join threads */
 	if (pthread_join( queueerThread, NULL ) != 0) {
-		fprintf( stderr, "Failed to join queueer thread, ID:%d : %s\n", num_threads, strerror( errno ) );
+		fprintf( stderr, "Failed to join queueer thread, ID:%d : %s\n", num_threads + 1, strerror( errno ) );
 	}
 	else {
-		fprintf( stderr, "Joined thread %d : queueer\n", num_threads);
+		fprintf( stderr, "Joined thread %d : queueer\n", num_threads + 1);
 	}
 	for (id = 0; id < num_threads; id++) {
 		if (pthread_join( processerThreads[ id ], NULL) != 0) {
-			fprintf( stderr, "Failed to join processer thread, ID:%d : %s\n", id, strerror( errno ) );
+			fprintf( stderr, "Failed to join processer thread, ID:%d : %s\n", ids[ id ], strerror( errno ) );
 		}
 		else {
-			fprintf( stderr, "Joined thread %d\n", id);
+			fprintf( stderr, "Joined thread %d\n", ids[ id ] );
 		}
 	}
 
@@ -161,7 +161,7 @@ void *processer( void *args ) {
 		fputc ( '\n', resultFile );
 		fclose ( resultFile );
 
-		fprintf( stderr, "Hi! I am ID:%d\n", id);
+		fprintf( stderr, "1:Hi! I am ID:%d\n", id);
 
 		//post that there is another empty slot
 		if (sem_post( &empty_slots ) != 0) {
@@ -169,7 +169,7 @@ void *processer( void *args ) {
 			exit( EXIT_FAILURE );
 		}
 
-		fprintf( stderr, "Hi! I am ID:%d\n", id);
+		fprintf( stderr, "2:Hi! I am ID:%d\n", id);
 	}
 
 	return NULL;
