@@ -26,9 +26,8 @@ TwitterDBMem_t TwitterDBMem_construct(FILE* twitterDB);
 /* destruct tdbm */
 void TwitterDBMem_destruct(TwitterDBMem_t tdbm);
 
-/* points cline to the city's line, or NULL if city does not exist. 
- * Returns false if city DNE, otherwise true. */
-bool TwitterDBMem_getCityKwd(TwitterDBMem_t tdbm, const char *city, char **cline);
+/* returns the city's line, or NULL if city does not exist. */
+char *TwitterDBMem_getCityKwd(TwitterDBMem_t tdbm, const char *city);
 
 #endif //TWITTERDBMEM_H_GUARD
 

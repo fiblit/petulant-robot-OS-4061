@@ -10,7 +10,7 @@ TwitterDBMem_t TwitterDBMem_construct(FILE* twitterDB) {
 	//allocate tdbm
 	TwitterDBMem_t tdbm = (TwitterDBMem_t) malloc( sizeof( TwitterDBMem ) );
 	
-	/* the following is basically what will be "int fgetlines(FILE* f, char ***lines)" */
+	/* TODO: the following is basically what will be "int fgetlines(FILE* f, char ***lines)" */
 	//count number of lines in twitterDB
 	rewind( twitterDB );
 	char c = fgetc( twitterDB );
@@ -63,19 +63,20 @@ void TwitterDBMem_destruct(TwitterDBMem_t tdbm) {
 	free( tdbm );
 }
 
-/* points cline to the city's line or NULL if city does not exist. 
- * Returns false if city DNE, otherwise true. */
-bool TwitterDBMem_getCityKwd(TwitterDBMem_t tdbm, const char *city, char **cline) {
-	
+
+/* returns the city's line, or NULL if city does not exist. */
+char *TwitterDBMem_getCityKwd(TwitterDBMem_t tdbm, const char *city) {
+
 	//Linear search. TODO: change it to a binary search
 	int cityLen = strlen( city );
-	*cline = NULL;
 	for (int i = 0; i < tdbm->numLines; i++) {
 		if ( strncmp( tdbm->lines[ i ], city, cityLen ) == 0 ) {
-			*cline = tdbm->lines[ i ];
-			return true;
+			int cLineLen = strlen( tdbm->lines[ i ] );
+			char *cline = (char *) malloc( sizeof( char ) * cLineLen );
+			strcpy( cline, tdbm->lines[ i ] );
+			return cline;
 		}
 	}
-	return false;
+	return NULL;
 }
 
