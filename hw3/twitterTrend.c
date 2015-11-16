@@ -112,14 +112,21 @@ void *processer( void *args ) {
 
 	while ( 1 ) { //test if the queue has anything in it
 
-		sem_getvalue ( &full_slots, &semValue );
-		if ( globalQueue && ( semValue == 0) ) {
-			break;
-		}
+		sem_getvalue ( &full_slots, &semValue );	
 		//keep dequeueing until we break
 		if ( sem_wait ( &full_slots ) != 0 ) {
 			perror( "Error occured while processer was waiting" );
 		}
+
+		if ( globalQueue ) {
+
+			//continue ending threads
+			if (sem_post( &full_slots ) != 0 ) {
+				perror( "Error occured while posting to a semaphore" );
+			}
+			break;
+		}
+
 		//lock access to queue
 		if (sem_wait( &mut ) != 0) {
 			perror( "Error occured while waiting for semaphore lock" );
@@ -172,15 +179,11 @@ void *processer( void *args ) {
 
 		printf( "Thread %d is finished handling client %s\n", id, originalFileName );
 
-		fprintf( stderr, "1:Hi! I am ID:%d\n", id);
-
 		//post that there is another empty slot
 		if (sem_post( &empty_slots ) != 0) {
 			perror( "Error occured while posting to a semaphore" );
 			exit( EXIT_FAILURE );
 		}
-
-		fprintf( stderr, "2:Hi! I am ID:%d\n", id);
 	}
 
 	return NULL;
@@ -214,13 +217,19 @@ void *queueer( void *args ) {
 
 		//get next line or EOF
 		if (fgets( newItem, MAXCITYNAMELENGTH + 1, inFile ) == NULL) {
+			globalQueue = true;
 
 			//release access to queue
 			if (sem_post( &mut ) != 0) {
 				perror( "Error occured while releasing semaphore lock" );
 				exit( EXIT_FAILURE );
 			}
-			globalQueue = true;
+		
+			//this is a nasty hack
+			if ( sem_post( &full_slots ) != 0 ) {
+				perror( "Error occurred while posting to a semaphore" );
+				exit( EXIT_FAILURE );
+			}
 			break;//no more items to add
 		}
 
@@ -250,7 +259,6 @@ void *queueer( void *args ) {
 			perror( "Error occured while posting to a semaphore" );
 			exit( EXIT_FAILURE );
 		}
-
 	}
 
 	return NULL;//Nothing to return
