@@ -15,6 +15,9 @@ int main( int argc, char *argv[] ) {
 	}
 	char *inFileName = argv[ 1 ];
 	int num_threads = atoi( argv[ 2 ] );
+	if ( num_threads <= 0) {
+		errorFunction ( "num_threads is less than or equal to 0, exiting");
+	}
 
 	/* init data structures */
 	openInFile( inFileName );
@@ -196,7 +199,8 @@ void *processer( void *args ) {
 		//will stick the city's line in cityLine if it exists
 		cityLine = TwitterDBMem_getCityKwd( tdbm, cityBuf );
 		if ( !( cityLine ) ) {
-			fprintf ( stderr, "City %s does not exist", cityBuf );
+			fprintf ( stderr, "City %s does not exist\n", cityBuf );
+			exit( EXIT_FAILURE );
 		}
 		cityLength = strlen ( cityBuf );
 		strncpy ( lineAfterCityName, cityLine + cityLength + 1, ( 100 - cityLength )); //+1 for the extra comma
