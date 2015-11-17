@@ -15,7 +15,8 @@ int main( int argc, char *argv[] ) {
 	}
 	char *inFileName = argv[ 1 ];
 	int num_threads = atoi( argv[ 2 ] );
-	if ( num_threads <= 0) {
+	if ( num_threads <= 0) {  //num_threads should be > 0
+		errno = EINVAL;
 		errorFunction ( "num_threads is less than or equal to 0, exiting");
 	}
 
