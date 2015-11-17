@@ -72,7 +72,7 @@ char *TwitterDBMem_getCityKwd(TwitterDBMem_t tdbm, const char *city) {
 	int cityLen = strlen( city );
 	for (int i = 0; i < tdbm->numLines; i++) {
 		if ( strncmp( tdbm->lines[ i ], city, cityLen ) == 0 ) {
-			int cLineLen = strlen( tdbm->lines[ i ] );
+			int cLineLen = strlen( tdbm->lines[ i ] ) + 1;
 			char *cline = (char *) malloc( sizeof( char ) * cLineLen );
 			if ( cline == NULL ) { //malloc error checking
 				errorFunction ( "Call to malloc failed in TwitterDBMem_getCityKwd" );

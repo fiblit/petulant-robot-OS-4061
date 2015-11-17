@@ -89,6 +89,8 @@ int main( int argc, char *argv[] ) {
 	fclose( inFile );
 	TwitterDBMem_destruct( tdbm );
 	queue_destruct( queue );
+	free( processerThreads );
+	free( ids );
 
 	return 0;
 }
@@ -205,6 +207,8 @@ void *processer( void *args ) {
 		cityLength = strlen ( cityBuf );
 		strncpy ( lineAfterCityName, cityLine + cityLength + 1, ( 100 - cityLength )); //+1 for the extra comma
 
+		//free( cityLine );
+
 		//create result file
 		strcat( processerFileName, ".result" ); //create name of result file
 		resultFile = fopen ( processerFileName, "w+" ); //w+ mode will create the file
@@ -227,7 +231,7 @@ void *processer( void *args ) {
 			exit( EXIT_FAILURE );
 		}
 	}
-
+	
 	return NULL;
 }
 
@@ -255,14 +259,23 @@ void *queueer( void *args ) {
 
 		// TODO: <insert semaphore wait to inFile>
 
+		char c = fgetc( inFile );
+		int itemLength = 1;
+		while( c != '\n' && c != EOF ) {
+			c = fgetc( inFile );
+			itemLength++;
+		}
+		if(c != EOF)
+			fseek( inFile, -itemLength, SEEK_CUR);
+
 		/* put next item on queue */
-		char *newItem = ( char * ) malloc( sizeof( char ) * ( MAXCITYNAMELENGTH + 1 ) );
+		char *newItem = ( char * ) malloc( sizeof( char ) * ( itemLength + 1 ) );
 		if ( newItem == NULL ) { //malloc error checking
 			errorFunction ( "Call to malloc failed in queueer" );
 		}
 
 		//get next line or EOF
-		if ( fgets( newItem, MAXCITYNAMELENGTH + 1, inFile ) == NULL ) {
+		if ( fgets( newItem, itemLength + 1, inFile ) == NULL ) {
 			globalQueue = true;
 
 			//release access to queue
@@ -293,6 +306,8 @@ void *queueer( void *args ) {
 			exit( EXIT_FAILURE );
 		}
 		queue_enqueue( queue, newItem );
+
+		free( newItem );
 
 		//release access to queue
 		if ( sem_post( &mut ) != 0 ) {

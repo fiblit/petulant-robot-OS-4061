@@ -49,7 +49,7 @@ void queueNode_destruct( queueNode_t qn ) {
 /* adds item to the tail of the queue */
 void queue_enqueue( queue_t q, char *item ) {
 	queueNode_t qn = queueNode_construct();
-	qn->item = (char *) malloc( sizeof( char ) * strlen( item ) );
+	qn->item = (char *) malloc( sizeof( char ) * (strlen( item )+1) );
 	if ( qn->item == NULL ) { //malloc error checking
 		errorFunction ( "Call to malloc failed in queue_enqueue" );
 	}
@@ -74,7 +74,7 @@ char *queue_dequeue( queue_t q ) {
 		queueNode_t oldHead = q->head;
 
 		/* get retval */
-		char *ret = (char *) malloc( sizeof( char ) * strlen( q->head->item ) );
+		char *ret = (char *) malloc( sizeof( char ) * (strlen( q->head->item ) + 1) );
 		if ( ret == NULL ) { //malloc error checking
 			errorFunction ( "Call to malloc failed in queue_dequeue" );
 		}
