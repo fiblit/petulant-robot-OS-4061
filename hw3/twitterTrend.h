@@ -16,6 +16,7 @@
 
 #include "twitterDBMem.h"
 #include "queue.h"
+#include "errorFunction.h"
 
 #define TWITTERDB_FILENAME "TwitterDB.txt"
 #define MAXCITYNAMELENGTH 15

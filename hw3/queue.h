@@ -12,6 +12,8 @@
 #include <errno.h>
 #include <stdio.h>
 
+#include "errorFunction.h"
+
 typedef struct queueNode {
 	struct queueNode *next;
 	char *item;
@@ -46,4 +48,3 @@ void queue_enqueue( queue_t q, char *item );
 char *queue_dequeue( queue_t q );
 
 #endif //QUEUE_H_GUARD
-

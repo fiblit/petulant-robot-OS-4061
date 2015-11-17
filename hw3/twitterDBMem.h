@@ -13,6 +13,8 @@
 #include <stdlib.h>
 #include <string.h>
 
+#include "errorFunction.h"
+
 typedef struct TwitterDBMem {
 	char **lines;//Array of strings (lines, potentially sorted)
 	int numLines;
@@ -30,4 +32,3 @@ void TwitterDBMem_destruct(TwitterDBMem_t tdbm);
 char *TwitterDBMem_getCityKwd(TwitterDBMem_t tdbm, const char *city);
 
 #endif //TWITTERDBMEM_H_GUARD
-

@@ -6,10 +6,13 @@
 
 /* construct a TwitterDBMem from FILE */
 TwitterDBMem_t TwitterDBMem_construct(FILE* twitterDB) {
-	
+
 	//allocate tdbm
 	TwitterDBMem_t tdbm = (TwitterDBMem_t) malloc( sizeof( TwitterDBMem ) );
-	
+	if ( tdbm == NULL ) { //malloc error checking
+		errorFunction ( "Call to malloc failed in TwitterDBMem_construct" );
+	}
+
 	/* TODO: the following is basically what will be "int fgetlines(FILE* f, char ***lines)" */
 	//count number of lines in twitterDB
 	rewind( twitterDB );
@@ -25,8 +28,7 @@ TwitterDBMem_t TwitterDBMem_construct(FILE* twitterDB) {
 	//allocate space for the lines
 	tdbm->lines = (char **) malloc( sizeof( char * ) * tdbm->numLines );
 	if (tdbm->lines == NULL) {
-		perror( "Call to malloc failed in TwitterDBMem_construct" );
-		exit( EXIT_FAILURE );
+		errorFunction ( "Call to malloc failed in TwitterDBMem_construct" );
 	}
 
 	//read the lines
@@ -41,16 +43,15 @@ TwitterDBMem_t TwitterDBMem_construct(FILE* twitterDB) {
 		if (c == EOF) {
 			lineLen--; //exclude EOF from the line count
 		}
-		
+
 		tdbm->lines[ i ] = (char *) malloc( sizeof( char ) * (lineLen + 1) );
-		if ( tdbm->lines[ i ] == NULL ) { 
-			perror( "Call to malloc failed in TwitterDBMem_construct" );
-			exit( EXIT_FAILURE );
+		if ( tdbm->lines[ i ] == NULL ) {
+			errorFunction ( "Call to malloc failed in TwitterDBMem_construct" );
 		}
 		fseek( twitterDB, -lineLen, SEEK_CUR );//move back the # of chars in the line
 		fgets( tdbm->lines[ i ], lineLen + 1, twitterDB );//+1 for the '\0' char
 	}
-	
+
 	return tdbm;
 }
 
@@ -73,10 +74,12 @@ char *TwitterDBMem_getCityKwd(TwitterDBMem_t tdbm, const char *city) {
 		if ( strncmp( tdbm->lines[ i ], city, cityLen ) == 0 ) {
 			int cLineLen = strlen( tdbm->lines[ i ] );
 			char *cline = (char *) malloc( sizeof( char ) * cLineLen );
+			if ( cline == NULL ) { //malloc error checking
+				errorFunction ( "Call to malloc failed in TwitterDBMem_getCityKwd" );
+			}
 			strcpy( cline, tdbm->lines[ i ] );
 			return cline;
 		}
 	}
 	return NULL;
 }
-

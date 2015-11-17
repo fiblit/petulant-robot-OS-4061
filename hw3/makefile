@@ -11,13 +11,15 @@ LDFLAGS = -pthread
 
 all: twitterTrend
 
-twitterTrend: twitterTrend.o queue.o twitterDBMem.o
-	$(CC) $(LDFLAGS) -o $@ $^ 
-twitterTrend.o: twitterTrend.c twitterTrend.h twitterDBMem.h queue.h
+twitterTrend: twitterTrend.o queue.o twitterDBMem.o errorFunction.o
+	$(CC) $(LDFLAGS) -o $@ $^
+twitterTrend.o: twitterTrend.c twitterTrend.h twitterDBMem.h queue.h errorFunction.h
 	$(CC) $(CFLAGS) $<
-twitterDBMem.o: twitterDBMem.c twitterDBMem.h
+twitterDBMem.o: twitterDBMem.c twitterDBMem.h errorFunction.h
 	$(CC) $(CFLAGS) $<
-queue.o: queue.c queue.h
+queue.o: queue.c queue.h errorFunction.h
+	$(CC) $(CFLAGS) $<
+errorFunction.o: errorFunction.c errorFunction.h
 	$(CC) $(CFLAGS) $<
 
 clean:
