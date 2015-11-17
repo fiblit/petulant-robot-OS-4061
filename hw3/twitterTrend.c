@@ -57,14 +57,14 @@ int main( int argc, char *argv[] ) {
 			fprintf( stderr, "Failed to create processer thread, ID:%d : %s\n", ids[ id ], strerror( errno ) );
 		}
 		else {
-			fprintf( stderr, "Created thread %d\n", ids[ id ] );
+			//fprintf( stderr, "Created thread %d\n", ids[ id ] );
 		}
 	}
 	if ( pthread_create( &queueerThread, NULL, queueer, &ids[ id ]) != 0 ) {
 		fprintf( stderr, "Failed to create queueer thread, ID:%d : queueer : %s\n", num_threads + 1, strerror( errno ) );
 	}
 	else {
-		fprintf( stderr, "Created thread %d : queueer\n", num_threads + 1);
+		//fprintf( stderr, "Created thread %d : queueer\n", num_threads + 1);
 	}
 
 	/* join threads */
@@ -72,14 +72,14 @@ int main( int argc, char *argv[] ) {
 		fprintf( stderr, "Failed to join queueer thread, ID:%d : %s\n", num_threads + 1, strerror( errno ) );
 	}
 	else {
-		fprintf( stderr, "Joined thread %d : queueer\n", num_threads + 1);
+		//fprintf( stderr, "Joined thread %d : queueer\n", num_threads + 1);
 	}
 	for ( id = 0; id < num_threads; id++ ) {
 		if ( pthread_join( processerThreads[ id ], NULL) != 0 ) {
 			fprintf( stderr, "Failed to join processer thread, ID:%d : %s\n", ids[ id ], strerror( errno ) );
 		}
 		else {
-			fprintf( stderr, "Joined thread %d\n", ids[ id ] );
+			//fprintf( stderr, "Joined thread %d\n", ids[ id ] );
 		}
 	}
 
@@ -232,8 +232,9 @@ void *queueer( void *args ) {
 		//test if the queue has slots to fill
 		if ( sem_trywait( &empty_slots ) != 0 && errno == EAGAIN ) {
 			if ( errno == EAGAIN ) { //we're just at 0
-				fprintf( stderr, "Thread %d is waiting to add items to the full queue...\n", id );
+				fprintf( stderr, "Waiting to add items to the full queue\n" );
 				if (sem_wait( &empty_slots ) != 0 ) {
+					fprintf( stderr, "ID:%d", id);//just so id is used once
 					perror( "An error occured while the queueer was waiting" );
 					exit( EXIT_FAILURE );
 				}
