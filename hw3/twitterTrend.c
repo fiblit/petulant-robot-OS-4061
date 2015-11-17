@@ -179,7 +179,11 @@ void *processer( void *args ) {
 			exit( EXIT_FAILURE );
 		}
 		else {
-			cityFile = fopen ( processerFileName, "r" );
+			if ( access ( processerFileName, F_OK ) != -1 ) {  //check if file exists, if it does open it
+				cityFile = fopen ( processerFileName, "r" );
+			} else { //it does not exist
+				errorFunction ( "Error, attempting to open nonexistent file" );
+			}
 		}
 		fgets ( cityBuf, MAXCITYNAMELENGTH, cityFile );
 		fclose ( cityFile );

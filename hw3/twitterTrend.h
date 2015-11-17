@@ -13,6 +13,7 @@
 #include <pthread.h>
 #include <semaphore.h>
 #include <errno.h>
+#include <unistd.h>
 
 #include "twitterDBMem.h"
 #include "queue.h"
