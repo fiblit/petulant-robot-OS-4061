@@ -133,12 +133,12 @@ void *processer( void *args ) {
 		errorFunction ( "Call to malloc failed in processer" );
 	}
 
-	char *processerFileName = ( char * ) malloc ( sizeof ( char ) * 100); //should be big enough for the name "clientX.txt"
+	char *processerFileName = ( char * ) malloc ( sizeof ( char ) * 15); //should be big enough for the name "clientX.txt"
 	if ( processerFileName == NULL ) { //malloc error checking
 		errorFunction ( "Call to malloc failed in processer" );
 	}
 
-	char *originalFileName = ( char * ) malloc ( sizeof ( char ) * 100); //should be big enough for the name "clientX.txt"
+	char *originalFileName = ( char * ) malloc ( sizeof ( char ) * 15); //should be big enough for the name "clientX.txt"
 	if ( originalFileName == NULL ) { //malloc error checking
 		errorFunction ( "Call to malloc failed in processer" );
 	}
