@@ -2,29 +2,53 @@
 * name: Dalton Hildreth, Timothy Kohn
 * id: hildr039, kohnx074 */
 
-#include "twitterTrend.h"
+#include "twitterTrend_server.h"
 
 /* does initial processing, in particular, it starts the threads */
 int main( int argc, char *argv[] ) {
 
+	/* init public server socket */
+	int serverSocket = socket( AF_INET, SOCK_STREAM, 0 );//SOCK_STREAM = TCP protocol
+	if (serverSocket == -1)
+		errorMessage( "Failed to create server socket" );
+
 	/* get args */
-	if ( argc != 3 ) {
+	int num_threads;
+	int publicServerPort;
+	if ( argc > 3 || argc < 2) { // invalid range
 		fprintf( stderr, "Incorrect usage.\n" );
-		fprintf( stderr, "\tUsage: %s <*.in file> <num_threads>\n", argv[ 0 ] );
+		fprintf( stderr, "\tUsage: %s <port_number> [num_threads = 5]\n", argv[ 0 ] );
 		return 1;
 	}
-	char *inFileName = argv[ 1 ];
-	int num_threads = atoi( argv[ 2 ] );
-	if ( num_threads <= 0) {  //num_threads should be > 0
-		errno = EINVAL;
-		errorFunction ( "num_threads is less than or equal to 0, exiting");
+	else {
+		if (argc == 2) { //optional param excluded
+			num_threads = 5; //default value
+		}
+		else { //optional param included
+			num_threads = atoi( argv[ 2 ] );
+			//num_threads should be > 0
+			if ( num_threads <= 0) { 
+				errno = EINVAL;
+				errorFunction( "num_threads is less than or equal to 0, exiting" );
+			}
+		}
+		publicServerPort = atoi( argv[ 3 ] );
 	}
 
+	/* bind socket to port and listen */
+	struct sockaddr_in serverAddr;
+	serverAddr.sin_family = AF_INET;
+	serverAddr.sin_port = htons((short)publicServerPort);
+	serverAddr.sin_addr.s_addr = htonl( INADDR_ANY );
+	if ( bind( serverSocket, (struct sockadder *)&serverAddr, sizeof(serverAddr) ) == -1)
+		errorMessage( "Failed to bind to given port" );
+	if ( listen( serverSocket, 50 )  == -1)//TODO: change backlog amount to whatever it needs to be. (100?)
+		errorMessage( "Failed to listen on socket" );
+
 	/* init data structures */
-	openInFile( inFileName );
 	readTwitterDB();
 	queue = queue_construct();
-	globalQueue = false;
+	globalQueue = false;//TODO: Rename this dumb variable
 
 	/* init semaphores */
 	if ( sem_init( &full_slots, 0, 0 ) != 0 ) {
@@ -168,6 +192,10 @@ void *processer( void *args ) {
 			exit( EXIT_FAILURE );
 		}
 
+		/*TODO: instead of handling filenames this must handle clients via the message protocol (abstracted to functions PLEASE)
+		 * The messages would start at "Step 7: Wait for twitterTrend request"
+		 */
+		//TODO: we also need to embed all of this in another while loop since it is not just one city being read. (function PLZ)
 		processerFileName = queue_dequeue ( queue ); //store the file name of the client
 
 		//release access to queue
@@ -176,10 +204,10 @@ void *processer( void *args ) {
 			exit( EXIT_FAILURE );
 		}
 
-		strcpy ( originalFileName, processerFileName ); //to makesure finished message outputs correctly
-;		printf( "Thread %d is handling client %s\n", id, processerFileName );
+		strcpy ( originalFileName, processerFileName ); //to makesure finished message outputs correctly;
+		printf( "Thread %d is handling client %s\n", id, processerFileName );//TODO: change filename to client info
 
-		//open file to get city name
+		//open file to get city name //TODO: basically replaced by step #7
 		if ( processerFileName == NULL ) { //check to make sure something is in processerFileName
 			perror( "ProcesserFileName is NULL, fopen would have segfaulted" );
 			exit( EXIT_FAILURE );
@@ -199,8 +227,8 @@ void *processer( void *args ) {
 		}
 
 
-		//will stick the city's line in cityLine if it exists
-		cityLine = TwitterDBMem_getCityKwd( tdbm, cityBuf );
+		//will stick the city's line in cityLine if it exists //TODO: replaced by step #9
+		cityLine = TwitterDBMem_getCityKwd( tdbm, cityBuf ); //TODO? exactly step #8
 		if ( !( cityLine ) ) {
 			fprintf ( stderr, "City %s does not exist\n", cityBuf );
 			exit( EXIT_FAILURE );
@@ -210,11 +238,11 @@ void *processer( void *args ) {
 
 		//free( cityLine );
 
-		//create result file
+		//create result file //TODO: move to client, it handles writing to .result
 		strcat( processerFileName, ".result" ); //create name of result file
 		resultFile = fopen ( processerFileName, "w+" ); //w+ mode will create the file
 
-		//write the city name, then put the : and two spaces in, then put the lineAfterCityName in, then add \n
+		//write the city name, then put the : and two spaces in, then put the lineAfterCityName in, then add \n //TODO: move to client, it handles writing to files
 		lineAfterCityNameLength = strlen ( lineAfterCityName );
 		fwrite ( cityBuf, sizeof ( char ), cityLength, resultFile );
 		fputc ( ' ', resultFile );
@@ -224,7 +252,8 @@ void *processer( void *args ) {
 		fputc ( '\n', resultFile );
 		fclose ( resultFile );
 
-		printf( "Thread %d is finished handling client %s\n", id, originalFileName );
+		//TODO: once done do step #11
+		printf( "Thread %d is finished handling client %s\n", id, originalFileName );//TODO: change filename to client info
 
 		//post that there is another empty slot
 		if ( sem_post( &empty_slots ) != 0 ) {
@@ -242,6 +271,9 @@ void *queueer( void *args ) {
 	//Keep enqueueing until we break from having no more items
 	while ( 1 ) {
 
+		//TODO: accept client
+		//TODO: handshake with client <- FUNCTION (in the process making a new port with client?)
+
 		//test if the queue has slots to fill
 		if ( sem_trywait( &empty_slots ) != 0 && errno == EAGAIN ) {
 			if ( errno == EAGAIN ) { //we're just at 0
@@ -258,8 +290,7 @@ void *queueer( void *args ) {
 			}
 		}
 
-		// TODO: <insert semaphore wait to inFile>
-
+		//TODO: replace reading from inFile with placing client info on queue
 		char c = fgetc( inFile );
 		int itemLength = 1;
 		while( c != '\n' && c != EOF ) {
@@ -269,7 +300,7 @@ void *queueer( void *args ) {
 		if(c != EOF)
 			fseek( inFile, -itemLength, SEEK_CUR);
 
-		/* put next item on queue */
+		/* put next item on queue */ //TODO: fix this so that newItem = return of message with client
 		char *newItem = ( char * ) malloc( sizeof( char ) * ( itemLength + 1 ) );
 		if ( newItem == NULL ) { //malloc error checking
 			errorFunction ( "Call to malloc failed in queueer" );
@@ -292,8 +323,6 @@ void *queueer( void *args ) {
 			}
 			break;//no more items to add
 		}
-
-		//TODO: <insert semaphore post to inFile>
 
 		//delete \n char
 		int newItemLen = strlen( newItem );
