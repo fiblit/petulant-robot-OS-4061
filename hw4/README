@@ -1,0 +1,6 @@
+/* CSci4061 Assignment 3
+* name: Dalton Hildreth, Timothy Kohn
+* id: hildr039, kohnx074 */
+
+Purpose:
+Find the hottest keywords on a 'twitter' database belonging to various cities. Each city is treated likea client in a client-server model, and are therefore processed on seperate threads.
