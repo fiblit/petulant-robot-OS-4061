@@ -44,6 +44,8 @@ int main( int argc, char *argv[] ) {
 		errorMessage( "Failed to bind to given port" );
 	if ( listen( serverSocket, 50 )  == -1)//TODO: change backlog amount to whatever it needs to be. (100?)
 		errorMessage( "Failed to listen on socket" );
+	else
+		printf("Listening on port %d", publicServerPort);
 
 	/* init data structures */
 	readTwitterDB();
@@ -227,7 +229,7 @@ void *processer( void *args ) {
 		}
 
 
-		//will stick the city's line in cityLine if it exists //TODO: replaced by step #9
+		//will stick the city's line in cityLine if it exists //TODO: replaced by step #9  (also output to stdout that we are repsonding)
 		cityLine = TwitterDBMem_getCityKwd( tdbm, cityBuf ); //TODO? exactly step #8
 		if ( !( cityLine ) ) {
 			fprintf ( stderr, "City %s does not exist\n", cityBuf );
@@ -252,7 +254,7 @@ void *processer( void *args ) {
 		fputc ( '\n', resultFile );
 		fclose ( resultFile );
 
-		//TODO: once done do step #11
+		//TODO: once done do step #11 (also output to stdout that we are responding)
 		printf( "Thread %d is finished handling client %s\n", id, originalFileName );//TODO: change filename to client info
 
 		//post that there is another empty slot
@@ -272,6 +274,7 @@ void *queueer( void *args ) {
 	while ( 1 ) {
 
 		//TODO: accept client
+		//TODO: output message for acceptance
 		//TODO: handshake with client <- FUNCTION (in the process making a new port with client?)
 
 		//test if the queue has slots to fill
