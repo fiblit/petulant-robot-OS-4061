@@ -1,4 +1,4 @@
-/* CSci4061 Assignment 3
+/* CSci4061 Assignment 4
 * name: Dalton Hildreth, Timothy Kohn
 * id: hildr039, kohnx074 */
 
@@ -27,7 +27,7 @@ int main( int argc, char *argv[] ) {
 		else { //optional param included
 			num_threads = atoi( argv[ 2 ] );
 			//num_threads should be > 0
-			if ( num_threads <= 0) { 
+			if ( num_threads <= 0) {
 				errno = EINVAL;
 				errorFunction( "num_threads is less than or equal to 0, exiting" );
 			}
@@ -263,7 +263,7 @@ void *processer( void *args ) {
 			exit( EXIT_FAILURE );
 		}
 	}
-	
+
 	return NULL;
 }
 

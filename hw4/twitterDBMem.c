@@ -1,4 +1,4 @@
-/* CSci4061 Assignment 3
+/* CSci4061 Assignment 4
 * name: Dalton Hildreth, Timothy Kohn
 * id: hildr039, kohnx074 */
 
