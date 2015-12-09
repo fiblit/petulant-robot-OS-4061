@@ -79,7 +79,6 @@ int main( int argc, char *argv[] ) {
             printf( "Here is cityname currently at %d, %s", n, cityNames[ n ] );
             twitterTrendRequest( sockfd, cityName );
             response_msg = waitForResponse( sockfd );
-            response_msg = construct_message( RESPONSE, "UMN,Lakes,Snow" );
             if ( response_msg->id == ERRMSG ) {
                 fprintf( stderr, "Received error message, closing connection. Payload: %s\n", response_msg->payload );
                 close( sockfd );
