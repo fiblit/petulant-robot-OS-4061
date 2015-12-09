@@ -30,9 +30,11 @@ int main( int argc, char *argv[] ) {
 
     host_name = argv[ 1 ];
     if ( strlen( host_name ) > HOST_NAME_MAX )
+		;
 
     for (i = 0; i < ( argc - 3 ); i++ ) {
         fileArray[ i ] = argv[ 3 + i ]; //3+i is all of the file arguments
+		printf("%s\n",argv[3 + i]);
     }
 
     //set hints struct to 0 to ensure no garbage values
@@ -77,12 +79,13 @@ int main( int argc, char *argv[] ) {
         exit( EXIT_FAILURE );
     }
 
-    char *fileName = ( char * ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE );
+    char *fileName;
     char **cityNames = ( char ** ) malloc ( sizeof ( char * ) * MAXCITYSIZE * MAXCITIES );
     char *cityName;
     message_t response_msg;
     for( int k = 0; k < ( argc - 3 ); k++ ) {
         fileName = fileArray[ k ];
+		printf("%s\n",fileName);
         cityNames = getCityNames( fileName );
 
         for (n = 0; cityNames[ n ] != NULL; n++ ) {
