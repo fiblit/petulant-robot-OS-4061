@@ -17,7 +17,7 @@
 
 typedef struct clientInfo {
 	int socket;
-	struct in_addr address;
+	struct sockaddr_in address;
 } queueClientInfo;
 
 typedef queueClientInfo* queueClientInfo_t;
@@ -50,7 +50,7 @@ queueNode_t queueNode_construct();
 void queueNode_destruct( queueNode_t qn );
 
 /* adds item to the tail of the queue */
-void queue_enqueue( queue_t q, int client, struct in_addr address );
+void queue_enqueue( queue_t q, int client, struct sockaddr_in address );
 
 /* returns item from the head of q and removes the item from head of q */
 queueClientInfo_t queue_dequeue( queue_t q );

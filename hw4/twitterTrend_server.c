@@ -141,23 +141,21 @@ void openInFile( char *inFileName ) {
 void *processer( void *args ) {
 	int id = *((int *) args);
 	int cityLength;
-	int lineAfterCityNameLength;
 	int lastCharOfCity;
 	int semValue;
 	FILE *cityFile;
-	FILE *resultFile;
 	char *cityBuf = ( char * ) malloc ( sizeof ( char ) * 16 ); //cityNames will be less than 15 characters
 	if ( cityBuf == NULL ) { //malloc error checking
 		errorFunction ( "Call to malloc failed in processer" );
 	}
 
-	char *cityLine = ( char * ) malloc ( sizeof ( char ) * 100 ); //every line in TwitterDB is less than 100 characters
-	if ( cityLine == NULL ) { //malloc error checking
+	char *lineAfterCityName = ( char * ) malloc ( sizeof ( char ) * 85 ); //will be contents of cityLine after the cityName
+ 	if ( lineAfterCityName == NULL ) { //malloc error checking
 		errorFunction ( "Call to malloc failed in processer" );
 	}
 
-	char *lineAfterCityName = ( char * ) malloc ( sizeof ( char ) * 85 ); //will be contents of cityLine after the cityName
-	if ( lineAfterCityName == NULL ) { //malloc error checking
+	char *cityLine = ( char * ) malloc ( sizeof ( char ) * 100 ); //every line in TwitterDB is less than 100 characters
+	if ( cityLine == NULL ) { //malloc error checking
 		errorFunction ( "Call to malloc failed in processer" );
 	}
 
@@ -205,9 +203,9 @@ void *processer( void *args ) {
 			exit( EXIT_FAILURE );
 		}
 
-		uint32_t clientAddrInt = htonl( processerClient->addr.sin_addr.s_addr );
-		uint16_t clientPortInt = processerClient->addr.sin_port; 
-		char * clientAddr = inet_ntoa( clientAddrVal );
+		uint32_t clientAddrInt = htonl( processerClient->address.sin_addr.s_addr );
+		uint16_t clientPortInt = processerClient->address.sin_port; 
+		char * clientAddr = inet_ntoa( *(struct in_addr *)&clientAddrInt );
 		char clientPort[ 6 ]; //6 since largest 16 bit unsigned is 65535 which is 5 chars + 1 for null
 		sprintf( clientPort, "%u", clientPortInt );
 		char * clientAddrPort = (char *) malloc( sizeof( char ) * (strlen(clientAddr) + 1 + 6) );//the 6 includes a null char, the 1 is a comma
@@ -220,7 +218,7 @@ void *processer( void *args ) {
 			break;
 		}
 
-		strcpy ( originalFileName, processerFileName ); //to makesure finished message outputs correctly;
+		strcpy ( originalFileName, processerFileName );//#EXPECTED TO BREAK. NOT DEALT WITH YET# //to makesure finished message outputs correctly;
 		printf( "Thread %d is handling client %s\n", id, processerFileName );//TODO: change filename to client info
 
 		//open file to get city name //TODO: basically replaced by step #7
@@ -294,7 +292,7 @@ void *queueer( void *args ) {
 
 		/*output message for acceptance*/
 		{
-			uint32_t ip = htonl( client.sin_addr.s_addr );
+			uint32_t ip = htonl( client.sin_addr.s_addr );//I just wanted to localize this temporary variable
 			printf( "server accepts connection from %s\n", inet_ntoa( *(struct in_addr *)&ip));
 		}
 		/* note to self: how to break out
@@ -311,7 +309,7 @@ void *queueer( void *args ) {
 		}
 
 		//place client on queue
-		queue_enqueue( queue, nextClientSocket, client.sin_addr );
+		queue_enqueue( queue, nextClientSocket, client );
 
 		//release access to queue
 		if ( sem_post( &mut ) != 0 ) {
