@@ -63,7 +63,10 @@ int main( int argc, char *argv[] ) {
 
     printf( "client connects\n" ); //displayed when connection successful
 
-    clientHandShake( sockfd );
+    if ( clientHandShake( sockfd ) == -1 ) {
+        printf( "Error: an error message was sent or recieved during handshake, exiting\n" );
+        exit( EXIT_FAILURE );
+    }
 
     char *fileName = ( char * ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE );
     char **cityNames = ( char ** ) malloc ( sizeof ( char * ) * MAXCITYSIZE * MAXCITIES );
@@ -76,12 +79,12 @@ int main( int argc, char *argv[] ) {
         for (n = 0; cityNames[ n ] != NULL; n++ ) {
             cityName = ( char * ) malloc ( sizeof ( char ) * MAXCITYSIZE );
             cityName = cityNames[ n ];
-            printf( "Here is cityname currently at %d, %s", n, cityNames[ n ] );
             twitterTrendRequest( sockfd, cityName );
             response_msg = waitForResponse( sockfd );
-            if ( response_msg->id == ERRMSG ) {
-                fprintf( stderr, "Received error message, closing connection. Payload: %s\n", response_msg->payload );
+            if ( response_msg->id == ERRMSG ) { //need to output payload, close the connection, then exit
+                fprintf( stderr, "Received error message from server, closing connection. Payload: %s\n", response_msg->payload );
                 close( sockfd );
+                exit(EXIT_FAILURE);
             }
 
             writeReportFile( fileName, cityName, response_msg );
@@ -96,7 +99,7 @@ char **getCityNames( char *filepath ) {
     FILE *cityFile;
     int lineCounter = 0;
     if ( filepath == NULL ) { //check to make sure something is in filepath
-        errorFunction( "Error : filepath is NULL, fopen would have segfaulted" );
+        errorFunction( "Error : filepath doesn't exist" );
     }
     else {
         if ( access ( filepath, F_OK ) != -1 ) {  //check if file exists, if it does open it
@@ -110,13 +113,7 @@ char **getCityNames( char *filepath ) {
     while ( fgets( buffer, MAXCITYSIZE, cityFile ) != NULL ) {
         cityNames[ lineCounter ] = ( char * ) malloc ( sizeof ( char ) * MAXCITYSIZE );
         strcpy( cityNames[ lineCounter ], buffer );
-        printf( "%d: %s", lineCounter, cityNames[ lineCounter ] );
         lineCounter++;
-    }
-
-    //for debugging purposes
-    for(int j = 0; j < lineCounter; j++ ) {
-        fprintf(stderr, "%d, %s", j, cityNames[ j ] );
     }
 
     fclose( cityFile );
