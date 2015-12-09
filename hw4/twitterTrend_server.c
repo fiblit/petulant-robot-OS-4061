@@ -144,10 +144,12 @@ void *processer( void *args ) {
 	int lastCharOfCity;
 	int semValue;
 	FILE *cityFile;
+	/* done later with more accuracy
 	char *cityBuf = ( char * ) malloc ( sizeof ( char ) * 16 ); //cityNames will be less than 15 characters
 	if ( cityBuf == NULL ) { //malloc error checking
 		errorFunction ( "Call to malloc failed in processer" );
 	}
+	*/
 
 	char *lineAfterCityName = ( char * ) malloc ( sizeof ( char ) * 85 ); //will be contents of cityLine after the cityName
  	if ( lineAfterCityName == NULL ) { //malloc error checking
@@ -191,11 +193,8 @@ void *processer( void *args ) {
 			exit( EXIT_FAILURE );
 		}
 
-		/*TODO: instead of handling filenames this must handle clients via the message protocol (abstracted to functions PLEASE)
-		 * The messages would start at "Step 7: Wait for twitterTrend request"
-		 */
-		//TODO: we also need to embed all of this in another while loop since it is not just one city being read. (function PLZ)
-		processerClient = queue_dequeue ( queue ); //store the file name of the client
+		//get clientInfo
+		processerClient = queue_dequeue ( queue );
 
 		//release access to queue
 		if ( sem_post( &mut ) != 0 ) {
@@ -203,6 +202,7 @@ void *processer( void *args ) {
 			exit( EXIT_FAILURE );
 		}
 
+		// get convenient strings for various output. clientAddrPort is the 127.0.0.1,XXXXX format
 		uint32_t clientAddrInt = htonl( processerClient->address.sin_addr.s_addr );
 		uint16_t clientPortInt = processerClient->address.sin_port; 
 		char * clientAddr = inet_ntoa( *(struct in_addr *)&clientAddrInt );
@@ -211,57 +211,92 @@ void *processer( void *args ) {
 		char * clientAddrPort = (char *) malloc( sizeof( char ) * (strlen(clientAddr) + 1 + 6) );//the 6 includes a null char, the 1 is a comma
 		clientAddrPort = strcat( strcat( strcat( clientAddrPort, clientAddr ), ","), clientPort );
 
-		//TODO: handshake with client STEP 5/6
-
+		/* handshake with client STEP 5/6 */
 		if (serverHandShake( processerClient->socket, clientAddrPort ) == -1) {
 			fprintf(stderr, "server failed to complete handshake\n" );
-			break;
+			break;//TODO: wait, I need to take the client off of the queue
 		}
 
-		strcpy ( originalFileName, processerFileName );//#EXPECTED TO BREAK. NOT DEALT WITH YET# //to makesure finished message outputs correctly;
-		printf( "Thread %d is handling client %s\n", id, processerFileName );//TODO: change filename to client info
+		//strcpy ( originalFileName, processerFileName );//#EXPECTED TO BREAK. NOT DEALT WITH YET# //to makesure finished message outputs correctly;
 
-		//open file to get city name //TODO: basically replaced by step #7
-		if ( processerFileName == NULL ) { //check to make sure something is in processerFileName
-			perror( "ProcesserFileName is NULL, fopen would have segfaulted" );
-			exit( EXIT_FAILURE );
-		}
-		else {
-			if ( access ( processerFileName, F_OK ) != -1 ) {  //check if file exists, if it does open it
-				cityFile = fopen ( processerFileName, "r" );
-			} else { //it does not exist
-				errorFunction ( "Error, attempting to open nonexistent file" );
+		/* I am handling */
+		printf( "Thread %d is handling client %s\n", id, clientAddrPort );
+
+		while ( 1 ) {//while requests
+
+			/* Step #7: wait for request*/
+			message_t request = construct_message_blank();
+			request = recvMessage( processerClient->socket, request );
+			
+			message_t response = construct_message_blank();
+			if (request->id == ERRMSG) {
+				printf( "server detected a client error: %s, from client %s\n\tclosing connection\n", request->payload, clientAddrPort);
+				destruct_message(response);
+				break;
+				//goes on to close client
 			}
+			else if (request->id != ENDREQ) {
+				destruct_message(response);
+				break;
+				//goes on to close client
+			}
+			else if (request->id != REQUEST) {
+				printf( "server detected client malfunction from client %s\n\tclosing connection\n", clientAddrPort);
+				response->payload = "Invalid message type: please request";
+				response->length = strlen(response->payload) + 1;
+				if(sendMessage( processerClient->socket, response ) == -1) {
+					printf( "server failed to notify client %s of its malfunction, continuing with close\n", clientAddrPort );
+				}	
+				destruct_message(response);
+				break;
+				//goes on to close client
+			}
+			//otherwise successfull request
+
+			//store city request
+			cityBuf = (char *) malloc( sizeof( char ) * request->length );
+
+			/* Step #8: find keywords */
+			cityLine = TwitterDBMem_getCityKwd( tdbm, cityBuf );
+
+			response->id = RESPONSE;
+			if (cityLine == NULL) {
+				response->payload = (char *) malloc( sizeof( char ) * 3 );
+				strcpy( response->payload, "NA");
+				response->payload[2] = '\0';
+				response->length = 3;//+1 for \0
+			}
+			else {
+				response->length = strlen( cityLine ) + 1;
+				response->payload = (char *) malloc( sizeof( char ) * response->length );
+				strcpy( response->payload, cityLine );
+			}
+
+			/* Step #9: send back 3 keywords followed by end of response message */
+			//message response
+			if(sendMessage( processerClient->socket, response ) == -1) {
+				printf( "server malfunction during response send to client %s\b", clientAddrPort );
+				break;
+				//goes on to close client
+			}
+			printf("server sends twitterTrend response: %s\n", build_string_message( response ) ); 
+
+			//message ENDOFRES
+			clean_message( response );
+			response->id = ENDRES;
+			response->length = 0;
+			if(sendMessage( processerClient->socket, response ) == -1) {
+				printf("server malfunction during end of response send to client %s\n", clientAddrPort);
+				break;
+				//goes on to close client
+			}
+			printf("server sends end of response: %s\n", build_string_message( response ) );
 		}
-		fgets ( cityBuf, MAXCITYNAMELENGTH, cityFile );
-		fclose ( cityFile );
-		lastCharOfCity = strlen( cityBuf );
-		if (cityBuf[ lastCharOfCity - 1 ] == '\n') {
-			cityBuf[ lastCharOfCity - 1 ] = '\0';
-		}
 
-
-		//will stick the city's line in cityLine if it exists //TODO: replaced by step #9  (also output to stdout that we are repsonding)
-		cityLine = TwitterDBMem_getCityKwd( tdbm, cityBuf ); //TODO? exactly step #8
-		if ( !( cityLine ) ) {
-			fprintf ( stderr, "City %s does not exist\n", cityBuf );
-			exit( EXIT_FAILURE );
-		}
-		cityLength = strlen ( cityBuf );
-		strncpy ( lineAfterCityName, cityLine + cityLength + 1, ( 100 - cityLength )); //+1 for the extra comma
-
-		//free( cityLine );
-
-		//TODO: once done do step #11 (also output to stdout that we are responding)
-		printf( "Thread %d is finished handling client %s\n", id, originalFileName );//TODO: change filename to client info
-
-		//post that there is another empty slot
-		/*Deprecated: unbounded
-		if ( sem_post( &empty_slots ) != 0 ) {
-			perror( "Error occured while posting to a semaphore" );
-			exit( EXIT_FAILURE );
-		}
-		*/
+		/* Step #11: close the connection with client */
+		printf( "Thread %d is finished handling client %s\n", id, clientAddrPort );
+		printf( "server closes the connection from client %s\n", clientAddrPort );
+		close( processer->socket );
 	}
 
 	return NULL;
