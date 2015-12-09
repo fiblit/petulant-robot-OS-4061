@@ -2,75 +2,74 @@
 * name: Dalton Hildreth, Timothy Kohn
 * id: hildr039, kohnx074 */
 
-/* outline of this file (and its header)
- *
- * TODO: okay I think I want to add a "message" struct of some sort to handle the messages
- *
- * main:
- *  put files to read in array (for ec) (not hard so might as well)
- * 	socket(): create socket
- *	handshake(): do two-way handshake with server
- *		: handshake includes the sending of message (#100) and message (#101)
- *	for each file to read: (for ec) (not hard so mgiht as well)
- *		report = createReportFile(): ...
- *		for each line in file:
- *			sendMessage(twitterTrendRequest): send linei request (#102) to server
- *			waitMessage(): wait for response
- *			error(reply): quit if reply was error message (#106)
- *			write(kwd reply): write kwd's of reply to this file's .report
- *	sendMessage(endOfRequest): send end of request message (#104)
- *
- */
+/*Bulk of my connection code at the beginning is heavily influenced by
+  the client example from Beej's Guide to Network Programming, at
+  www.retran.com/beej/clientserver.html#simpleclient
+*/
 
 #include "twitterTrend_client.h"
 
 int main( int argc, char *argv[] ) {
-    int sockfd, portno;
-    struct sockaddr_in serv_addr;
-    char buffer[ 100 ]; //everyline in TwitterDB is less than 100 chars
-    char * filepath = ( char * ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE );
+    int sockfd, getaddrinfo_rv;
+    struct addrinfo hints;
+    struct addrinfo *serv_info, *p;
+    char *portno = ( char * ) malloc ( sizeof ( char ) * MAXPORTNOSIZE );
+    char *filepath = ( char * ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE );
+    char *host_name = ( char * ) malloc ( sizeof ( char ) * HOST_NAME_MAX );
 
-    if( argc != 4 ) {
+    if ( argc != 4 ) {
         fprintf( stderr, "Usage : %s <hostname> <port number> <file_path>\n", argv[ 0 ] );
         return 1;
     }
 
-    //set buffer and serv_addr struct to 0 to ensure no garbage values
-    memset( buffer, '0', sizeof( buffer ) );
-    memset( &serv_addr, '0', sizeof( serv_addr ) );
-
-    portno = atoi( argv[ 2 ] );
+    //set hints struct to 0 to ensure no garbage values
+    memset( &hints, 0, sizeof ( hints ) );
+    portno = argv[ 2 ];
     filepath = argv[ 3 ];
-    sockfd = socket( AF_INET, SOCK_STREAM, 0 );
-    if( sockfd == -1 ) {
-        errorFunction( "Socket creation failed" );
+    host_name = argv[ 1 ];
+
+    hints.ai_family = AF_INET;
+    hints.ai_socktype = SOCK_STREAM;
+
+    getaddrinfo_rv = getaddrinfo( host_name, portno, &hints, &serv_info );
+    if ( getaddrinfo_rv != 0 ) {
+        fprintf( stderr, "getaddrinfo error: %s\n", gai_strerror( getaddrinfo_rv ) );
+        exit( EXIT_FAILURE );
     }
 
-    serv_addr.sin_family = AF_INET;
-    serv_addr.sin_port = htons( portno ); //change byte ordering to network compatible
+    //loop through the addresses trying until one works
+    for ( p = serv_info; p != NULL; p = p->ai_next ) {
+        sockfd = socket( p->ai_family, p->ai_socktype, p->ai_protocol );
+        if ( sockfd == -1 ) {
+            perror( "Client, error creating socket, trying again" );
+            continue;
+        }
 
-    //not sure if this is how to get the connection set up properly...
-    if ( inet_pton( AF_INET, argv[ 1 ], &serv_addr.sin_addr ) <= 0) { //might need to change argv[1] to ip from host_to_ip func
-        errorFunction( "Error occured in inet_pton on client" );
+        if ( connect( sockfd, p->ai_addr, p->ai_addrlen ) == -1 ) {
+            close ( sockfd );
+            perror( "Client, error connecting, trying again" );
+            continue;
+        }
+
+        break;
+    }
+
+    if ( p == NULL ) {
+        errorFunction( "Client failed to connect" );
     }
 
     //if connection succeeds print client connects to stdout
-    if( connect( sockfd, ( struct sockaddr * ) &serv_addr, sizeof( serv_addr )) == -1 ) {
-        errorFunction( "Connection attempt failed" );
-    }
-
     printf( "client connects\n" ); //displayed when connection successful
 
     clientHandShake( sockfd );
 
-    //start while loop here to get all the cities/files
+    //could have an array of the 2d arrays cityNames, one for each filepath
     char **cityNames = getCityNames( filepath );
-    int n = 0;
+    int i;
     char * cityName = ( char * ) malloc ( sizeof ( char ) * MAXCITYSIZE );
-    while ( cityNames[ n ] != NULL ) {
-        cityName = cityNames[ n ];
-        printf( "Here is cityname currently at %d, %s", n, cityNames[ n ] );
-        n++;
+    for (i = 0; cityNames[ i ] != NULL; i++ ) {
+        cityName = cityNames[ i ];
+        printf( "Here is cityname currently at %d, %s", i, cityNames[ i ] );
         twitterTrendRequest( sockfd, cityName );
         message_t response_msg = waitForResponse( sockfd );
         if ( response_msg->id == ERRMSG ) {
@@ -79,13 +78,10 @@ int main( int argc, char *argv[] ) {
         }
 
         writeReportFile( filepath, cityName, response_msg );
-        //repeat above in while loop until finished
     }
 
     //finally, end the request and close the connection (?)
     endRequest( sockfd );
-    //close( sockfd ); //might need to do this? probably not, I think server does
-
 }
 
 char **getCityNames( char *filepath ) {
@@ -104,7 +100,8 @@ char **getCityNames( char *filepath ) {
     char **cityNames = ( char ** ) malloc ( sizeof ( char ) * MAXCITYSIZE * MAXCITIES );
     char *buffer = ( char * ) malloc ( sizeof ( char ) * MAXCITYSIZE );
     while ( fgets( buffer, MAXCITYSIZE, cityFile ) != NULL ) {
-        strcpy( cityNames[ lineCounter ], buffer);  //segfaults at this line...am clueless why...
+        cityNames[ lineCounter ] = buffer;  //segfaults when I try to use strcpy, and this only grabs the last city for all the entries
+        //TODO: FIX THE ABOVE LINE to correctly grab our cityNames
         printf( "%d: %s", lineCounter, cityNames[ lineCounter ] );
         lineCounter++;
     }
@@ -125,10 +122,14 @@ void writeReportFile( char *filepath, char *cityName, message_t response_msg ) {
     char *reportFileName = ( char * ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE );
     strcpy( reportFileName, filepath ); //copy filepath into filePathCopy so filepath isn't altered incase we need it later
     strcat( reportFileName, ".result" ); //create name of result file
-    reportFile = fopen( reportFileName, "w+" ); //w+ mode will create the file
+    reportFile = fopen( reportFileName, "a+" ); //a+ mode will create the file and append further entries onto it
 
     lineAfterCityNameLength = response_msg->length; //length of payload
     cityLength = strlen( cityName );
+    if (cityName[ cityLength - 1 ] == '\n') {
+        cityName[ cityLength - 1 ] = '\0';
+    }
+
     fwrite( cityName, sizeof ( char ), cityLength, reportFile );
     fputc( ' ', reportFile );
     fputc( ':', reportFile );

@@ -3,7 +3,7 @@
 #* id: hildr039, kohnx074 */
 
 CC = gcc
-CVER = -std=c99
+CVER = -std=gnu99
 CWARN = -Wall -Werror
 DEBUG = -g #-DDEBUG
 CFLAGS = $(CVER) $(CWARN) $(DEBUG) -c

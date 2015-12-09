@@ -6,6 +6,7 @@
 
 message_t construct_message( int msg_id, char *msg_payload ) {
 	message_t msg = (message_t) malloc( sizeof(message) );
+	msg->payload = ( char * ) malloc ( sizeof ( char ) * MAXLINESIZE );
 	msg->id = msg_id;
 	if ( msg_id == ERRMSG || msg_id == REQUEST || msg_id == RESPONSE ) {
 		msg->length = strlen( msg_payload );
@@ -24,9 +25,9 @@ char * build_string_message( message_t msg ) {
 }
 
 void destruct_message( message_t msg ) {
-	/*if ( msg->payload != NULL ) {
+	if ( msg->payload != NULL ) {
 		free( msg->payload );
-	}*/ //segfaulting for me
+	}
 	free( msg );
 }
 
