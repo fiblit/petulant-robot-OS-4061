@@ -96,7 +96,6 @@ int recvMessage( int sock_fd, message_t recv ) {
 	char *length_string = ( char * ) malloc ( sizeof ( char ) * 4 ); //3 chars + '\0'
 	char *payload_string = ( char * ) malloc ( sizeof ( char ) * MAXLINESIZE );
 	clean_message( recv );
-	recv = construct_message_blank();
 
 	bytesRecv_id = read( sock_fd, id_string, sizeof( id_string ) );
 	if ( bytesRecv_id < 0 ) {
@@ -104,21 +103,29 @@ int recvMessage( int sock_fd, message_t recv ) {
 		return -1;
 	}
 	recv->id = atoi( id_string );
+	//fprintf(stderr, "\nDEBUG 1: %d\n", recv->id);
 
 	bytesRecv_length = read( sock_fd, length_string, sizeof( length_string ) );
 	if ( bytesRecv_length < 0 ) {
 		perror( "Error receiving length message" );
 		return -1;
 	}
-	recv->id = atoi( length_string );
+	recv->length = atoi( length_string );
+	//fprintf(stderr, "\nDEBUG 2: %d\n", recv->length);
 
 	bytesRecv_payload = read( sock_fd, payload_string, sizeof( payload_string ) );
 	if ( bytesRecv_payload < 0 ) {
 		perror( "Error receiving payload message" );
 		return -1;
 	}
-	recv->payload = ( char * ) malloc ( sizeof ( char ) * MAXLINESIZE );
-	recv->payload = payload_string;
+	recv->payload = ( char * ) malloc ( sizeof ( char ) * recv->length );
+	strcpy( recv->payload, payload_string );
+	//recv->payload[recv->length] = '\0';
+	//fprintf(stderr, "\nDEBUG 3: %s\n", recv->payload);
+
+	free(id_string);
+	free(length_string);
+	free(payload_string);
 
 	return bytesRecv_id + bytesRecv_length + bytesRecv_payload;
 }
