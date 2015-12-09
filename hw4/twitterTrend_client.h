@@ -5,7 +5,7 @@
 #ifndef TWITTERTREND_CLIENT_H
 #define TWITTERTREND_CLIENT_H
 
-#define MAXCITYSIZE 15
+#define MAXCITYSIZE 16
 #define MAXFILEPATHSIZE 19 //clientXX.in , clientXX.txt, and clientXX.in.result are not longer than 19 chars
 #define MAXCITIES 50 //according to PA3 forums, max lines in a .in file is 50
 #define HOST_NAME_MAX 255 //max hostname size is 255 bytes according to posix standard

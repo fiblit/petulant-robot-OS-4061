@@ -10,22 +10,25 @@
 #include "twitterTrend_client.h"
 
 int main( int argc, char *argv[] ) {
-    int sockfd, getaddrinfo_rv;
+    int sockfd, getaddrinfo_rv, i, n;
     struct addrinfo hints;
     struct addrinfo *serv_info, *p;
     char *portno = ( char * ) malloc ( sizeof ( char ) * MAXPORTNOSIZE );
-    char *filepath = ( char * ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE );
+    char **fileArray = ( char ** ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE * (argc - 3) ); //argc-3 is amount of files given
     char *host_name = ( char * ) malloc ( sizeof ( char ) * HOST_NAME_MAX );
 
-    if ( argc != 4 ) {
-        fprintf( stderr, "Usage : %s <hostname> <port number> <file_path>\n", argv[ 0 ] );
+    if ( argc < 4 ) {
+        fprintf( stderr, "Usage : %s <hostname> <port number> <file_path(s)>\n", argv[ 0 ] );
         return 1;
+    }
+
+    for (i = 0; i < ( argc - 3 ); i++ ) {
+        fileArray[ i ] = argv[ 3 + i ]; //3+i is all of the file arguments
     }
 
     //set hints struct to 0 to ensure no garbage values
     memset( &hints, 0, sizeof ( hints ) );
     portno = argv[ 2 ];
-    filepath = argv[ 3 ];
     host_name = argv[ 1 ];
 
     hints.ai_family = AF_INET;
@@ -58,29 +61,35 @@ int main( int argc, char *argv[] ) {
         errorFunction( "Client failed to connect" );
     }
 
-    //if connection succeeds print client connects to stdout
     printf( "client connects\n" ); //displayed when connection successful
 
     clientHandShake( sockfd );
 
-    //could have an array of the 2d arrays cityNames, one for each filepath
-    char **cityNames = getCityNames( filepath );
-    int i;
-    char * cityName = ( char * ) malloc ( sizeof ( char ) * MAXCITYSIZE );
-    for (i = 0; cityNames[ i ] != NULL; i++ ) {
-        cityName = cityNames[ i ];
-        printf( "Here is cityname currently at %d, %s", i, cityNames[ i ] );
-        twitterTrendRequest( sockfd, cityName );
-        message_t response_msg = waitForResponse( sockfd );
-        if ( response_msg->id == ERRMSG ) {
-            printf( "Received error message, closing connection\n" );
-            close( sockfd );
-        }
+    char *fileName = ( char * ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE );
+    char **cityNames = ( char ** ) malloc ( sizeof ( char * ) * MAXCITYSIZE * MAXCITIES );
+    char *cityName;
+    message_t response_msg;
+    for( int k = 0; k < ( argc - 3 ); k++ ) {
+        fileName = fileArray[ k ];
+        cityNames = getCityNames( fileName );
 
-        writeReportFile( filepath, cityName, response_msg );
+        for (n = 0; cityNames[ n ] != NULL; n++ ) {
+            cityName = ( char * ) malloc ( sizeof ( char ) * MAXCITYSIZE );
+            cityName = cityNames[ n ];
+            printf( "Here is cityname currently at %d, %s", n, cityNames[ n ] );
+            twitterTrendRequest( sockfd, cityName );
+            response_msg = waitForResponse( sockfd );
+            response_msg = construct_message( RESPONSE, "UMN,Lakes,Snow" );
+            if ( response_msg->id == ERRMSG ) {
+                fprintf( stderr, "Received error message, closing connection. Payload: %s\n", response_msg->payload );
+                close( sockfd );
+            }
+
+            writeReportFile( fileName, cityName, response_msg );
+            free( cityName );
+        }
     }
 
-    //finally, end the request and close the connection (?)
     endRequest( sockfd );
 }
 
@@ -88,27 +97,27 @@ char **getCityNames( char *filepath ) {
     FILE *cityFile;
     int lineCounter = 0;
     if ( filepath == NULL ) { //check to make sure something is in filepath
-		errorFunction( "ERROR : filepath is NULL, fopen would have segfaulted" );
-	}
-	else {
-		if ( access ( filepath, F_OK ) != -1 ) {  //check if file exists, if it does open it
-			cityFile = fopen ( filepath, "r" );
-		} else { //it does not exist
-			errorFunction ( "Error, attempting to open nonexistent file" );
-		}
-	}
-    char **cityNames = ( char ** ) malloc ( sizeof ( char ) * MAXCITYSIZE * MAXCITIES );
+        errorFunction( "Error : filepath is NULL, fopen would have segfaulted" );
+    }
+    else {
+        if ( access ( filepath, F_OK ) != -1 ) {  //check if file exists, if it does open it
+            cityFile = fopen ( filepath, "r" );
+        } else { //it does not exist
+            errorFunction ( "Error, attempting to open nonexistent file" );
+        }
+    }
+    char **cityNames = ( char ** ) malloc ( sizeof ( char * ) * MAXCITYSIZE * MAXCITIES );
     char *buffer = ( char * ) malloc ( sizeof ( char ) * MAXCITYSIZE );
     while ( fgets( buffer, MAXCITYSIZE, cityFile ) != NULL ) {
-        cityNames[ lineCounter ] = buffer;  //segfaults when I try to use strcpy, and this only grabs the last city for all the entries
-        //TODO: FIX THE ABOVE LINE to correctly grab our cityNames
+        cityNames[ lineCounter ] = ( char * ) malloc ( sizeof ( char ) * MAXCITYSIZE );
+        strcpy( cityNames[ lineCounter ], buffer );
         printf( "%d: %s", lineCounter, cityNames[ lineCounter ] );
         lineCounter++;
     }
 
     //for debugging purposes
-    for(int i = 0; i < lineCounter; i++ ) {
-        printf( "%d, %s", i, cityNames[ i ] );
+    for(int j = 0; j < lineCounter; j++ ) {
+        fprintf(stderr, "%d, %s", j, cityNames[ j ] );
     }
 
     fclose( cityFile );
