@@ -10,7 +10,7 @@
 #include "twitterTrend_client.h"
 
 int main( int argc, char *argv[] ) {
-    int sockfd, getaddrinfo_rv, i, n;
+    int sockfd, getaddrinfo_rv, i, n, port_check;
     struct addrinfo hints;
     struct addrinfo *serv_info, *p;
     char *portno = ( char * ) malloc ( sizeof ( char ) * MAXPORTNOSIZE );
@@ -21,6 +21,15 @@ int main( int argc, char *argv[] ) {
         fprintf( stderr, "Usage : %s <hostname> <port number> <file_path(s)>\n", argv[ 0 ] );
         return 1;
     }
+
+    port_check = atoi( argv[ 2 ] );
+    if ( port_check < 0 || port_check > 65535 ) {
+        fprintf( stderr, "Error, port number must be above 0 and below 65535\n" );
+        return 1;
+    }
+
+    host_name = argv[ 1 ];
+    if ( strlen( host_name ) > HOST_NAME_MAX )
 
     for (i = 0; i < ( argc - 3 ); i++ ) {
         fileArray[ i ] = argv[ 3 + i ]; //3+i is all of the file arguments
