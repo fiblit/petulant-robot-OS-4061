@@ -208,6 +208,8 @@ void *processer( void *args ) {
 			exit( EXIT_FAILURE );
 		}
 
+		//TODO: handshake with client STEP 5/6
+
 		strcpy ( originalFileName, processerFileName ); //to makesure finished message outputs correctly;
 		printf( "Thread %d is handling client %s\n", id, processerFileName );//TODO: change filename to client info
 
@@ -277,72 +279,43 @@ void *queueer( void *args ) {
 	//Keep enqueueing until we break from having no more clients? (<- not sure when this happens)
 	while ( 1 ) {
 
-		//TODO: accept client
-		//TODO: output message for acceptance
-		//TODO: handshake with client <- FUNCTION (in the process making a new port with client?)
+		/*accept client*/
+		struct sockaddr_in client;
+		int nextClientSocket;
+		int lenOfClientAddr = sizeof( struct sockaddr * );
 
-		//test if the queue has slots to fill
-		/*Deprecated: server is now unbounded
-		if ( sem_trywait( &empty_slots ) != 0 && errno == EAGAIN ) {
-			if ( errno == EAGAIN ) { //we're just at 0
-				fprintf( stderr, "Waiting to add items to the full queue\n" );
-				if (sem_wait( &empty_slots ) != 0 ) {
-					fprintf( stderr, "ID:%d", id);//just so id is used once
-					perror( "An error occured while the queueer was waiting" );
-					exit( EXIT_FAILURE );
-				}
-			}
-			else { //real error occured
-				perror( "An error occured while the queueer was trying to wait" );
-				exit( EXIT_FAILURE );
-			}
-		}*/
+		int acceptRet;
+		while ((acceptRet = accept( serverSocket, (struct sockaddr *)&client, (socklen_t *)&lenOfClientAddr) == -1) &&
+			(errno == EINTR))//this loop was influenced by the book p.637. I wouldn't have checked for EINTR and looped before
+		if (acceptRet == -1) {
 
-		//TODO: replace reading from inFile with placing client info on queue
-		char c = fgetc( inFile );
-		int itemLength = 1;
-		while( c != '\n' && c != EOF ) {
-			c = fgetc( inFile );
-			itemLength++;
+			//failed to accept try again
+			continue;
 		}
-		if(c != EOF)
-			fseek( inFile, -itemLength, SEEK_CUR);
-
-		/* put next item on queue */ //TODO: fix this so that newItem = return of message with client
-		char *newItem = ( char * ) malloc( sizeof( char ) * ( itemLength + 1 ) );
-		if ( newItem == NULL ) { //malloc error checking
-			errorFunction ( "Call to malloc failed in queueer" );
+		else {
+			nextClientSocket = acceptRet;
 		}
 
-		//get next line or EOF
-		if ( fgets( newItem, itemLength + 1, inFile ) == NULL ) {
-			globalQueue = true;
-
-			//release access to queue
-			if ( sem_post( &mut ) != 0 ) {
-				errorFunction( "Error occured while releasing semaphore lock" );
-			}
-			
+		/*output message for acceptance*/
+		{
+			uint32_t ip = htonl( client.sin_addr.s_addr );
+			printf( "server accepts connection from %s\n", inet_ntoa( *(struct in_addr *)&ip));
+		}
+		/* note to self: how to break out
 			//this is a nasty hack
 			if ( sem_post( &full_slots ) != 0 ) {
 				errorFunction( "Error occurred while posting to a semaphore" );
 			}
 			break;//no more items to add
-		}
-
-		//delete \n char
-		int newItemLen = strlen( newItem );
-		if (newItem[ newItemLen - 1 ] == '\n') {
-			newItem[ newItemLen - 1 ] = '\0';
-		}
+		*/
 
 		//Lock access to queue
-		if ( sem_wait( &mut ) != 0 ) {//TODO: turn these validators into functions
+		if ( sem_wait( &mut ) != 0 ) {//TODO: turn these validators into functions (very very very low priority)
 			errorFunction( "Error occured while acquiring semaphore lock" );
 		}
-		queue_enqueue( queue, newItem );
 
-		free( newItem );
+		//place client on queue
+		queue_enqueue( queue, nextClientSocket, client.sin_addr );
 
 		//release access to queue
 		if ( sem_post( &mut ) != 0 ) {

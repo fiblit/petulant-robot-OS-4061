@@ -11,12 +11,20 @@
 #include <string.h>
 #include <errno.h>
 #include <stdio.h>
+#include <arpa/inet.h>
 
 #include "errorFunction.h"
 
+typedef struct clientInfo {
+	int socket;
+	struct in_addr address;
+} queueClientInfo;
+
+typedef queueClientInfo* queueClientInfo_t;
+
 typedef struct queueNode {
 	struct queueNode *next;
-	char *item;
+	queueClientInfo_t client;
 } queueNode;
 
 typedef queueNode* queueNode_t;
@@ -42,9 +50,9 @@ queueNode_t queueNode_construct();
 void queueNode_destruct( queueNode_t qn );
 
 /* adds item to the tail of the queue */
-void queue_enqueue( queue_t q, char *item );
+void queue_enqueue( queue_t q, int client, struct in_addr address );
 
 /* returns item from the head of q and removes the item from head of q */
-char *queue_dequeue( queue_t q );
+queueClientInfo_t queue_dequeue( queue_t q );
 
 #endif //QUEUE_H_GUARD

@@ -29,9 +29,14 @@ typedef struct message {
 
 typedef message *message_t;
 
+message_t construct_message_blank();
+
 message_t construct_message( int msg_id, char *msg_payload );
 
 char * build_string_message( message_t msg );
+
+//preps for a recv
+void clean_message( message_t msg);
 
 void destruct_message( message_t msg );
 
@@ -43,7 +48,9 @@ int sendMessage( int sock_fd, message_t send );
 
 int recvMessage( int sock_fd, message_t recv );
 
-void clientHandShake( int sock_fd );
+int clientHandShake( int sock_fd );
+
+int serverHandShake( int sock_fd, char * addr );
 
 void twitterTrendRequest( int sock_fd, char * cityName );
 

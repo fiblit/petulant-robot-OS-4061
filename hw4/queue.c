@@ -30,7 +30,10 @@ queueNode_t queueNode_construct() {
 		errorFunction ( "Call to malloc failed in queueNode_construct" );
 	}
 	qn->next = NULL;
-	qn->item = NULL;
+	queueClientInfo_t qci = (queueClientInfo_t) malloc( sizeof( queueClientInfo ) );
+	qn->client = qci;
+	qn->client->socket = -1;
+	qn->client->address = NULL;
 	return qn;
 }
 
@@ -40,20 +43,17 @@ void queueNode_destruct( queueNode_t qn ) {
 		return;
 	queueNode_destruct( qn->next );
 
-	if (qn->item != NULL)
-		free( qn->item );
+	if (qn->client != NULL)
+		free( qn->client );
 
 	free( qn );
 }
 
 /* adds item to the tail of the queue */
-void queue_enqueue( queue_t q, char *item ) {
+void queue_enqueue( queue_t q, int socket, struct in_addr address ) {
 	queueNode_t qn = queueNode_construct();
-	qn->item = (char *) malloc( sizeof( char ) * (strlen( item )+1) );
-	if ( qn->item == NULL ) { //malloc error checking
-		errorFunction ( "Call to malloc failed in queue_enqueue" );
-	}
-	strcpy( qn->item, item );
+	qn->client->socket = socket;
+	qn->client->address = address;
 	if (q->head == NULL) {
 		q->head = qn;
 		q->tail = qn;
@@ -66,19 +66,16 @@ void queue_enqueue( queue_t q, char *item ) {
 }
 
 /* returns item from the head of q and removes the item from head of q */
-char *queue_dequeue( queue_t q ) {
-
+queueClientInfo_t queue_dequeue( queue_t q ) {
 	if (q->head != NULL) {
 
 		/* get old head */
 		queueNode_t oldHead = q->head;
 
 		/* get retval */
-		char *ret = (char *) malloc( sizeof( char ) * (strlen( q->head->item ) + 1) );
-		if ( ret == NULL ) { //malloc error checking
-			errorFunction ( "Call to malloc failed in queue_dequeue" );
-		}
-		strcpy( ret, q->head->item );
+		queueClientInfo_t info = (queueClientInfo_t) malloc ( sizeof( queueClientInfo ) );
+		info->socket = q->head->client->socket;
+		info->address = q->head->client->address;
 
 		/* move head forward */
 		if (q->head->next == NULL) {
