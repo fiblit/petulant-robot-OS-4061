@@ -52,6 +52,8 @@ void twitterTrendRequest( int sock_fd, char * cityName );
 
 message_t waitForResponse( int sock_fd );
 
+int acknowledgeEndOfResponse( int sock_fd );
+
 void endRequest( int sock_fd );
 
 #endif

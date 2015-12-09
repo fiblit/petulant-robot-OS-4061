@@ -224,8 +224,11 @@ void *processer( void *args ) {
 				destruct_message(request);
 				break;
 			}
+			printf("Here is request id from line227 in server: %d\n", request->id);
+			printf("Here is request payload from line228 in server: %s\n", request->payload);
 
 			message_t response = construct_message_blank();
+			printf("Here is response id from line230 in server: %d\n", response->id);
 			if (request->id == ERRMSG) {
 				printf( "server detected a client error: %s, from client %s\n\tclosing connection\n", request->payload, clientAddrPort);
 				destruct_message(request);
@@ -233,7 +236,7 @@ void *processer( void *args ) {
 				break;
 				//goes on to close client
 			}
-			else if (request->id != ENDREQ) {
+			else if (request->id == ENDREQ) {
 				destruct_message(request);
 				destruct_message(response);
 				break;
@@ -255,9 +258,17 @@ void *processer( void *args ) {
 
 			//store city request
 			char * cityBuf = (char *) malloc( sizeof( char ) * request->length );
+			char *lineAfterCityName = ( char * ) malloc ( sizeof ( char ) * 85 );
+			//char zeroArray[ 85 ];
+			int lineAfterCityNameLength;
+			//memset(  zeroArray, '\0', sizeof( char ) * 85);
+			strcpy( cityBuf, request->payload );
+			printf("cityBuf: %s\n", cityBuf);
+			response->payload = (char *) malloc( sizeof( char ) * MAXLINESIZE );
 
 			/* Step #8: find keywords */
 			cityLine = TwitterDBMem_getCityKwd( tdbm, cityBuf );
+			printf("cityLine: %s\n", cityLine);
 
 			response->id = RESPONSE;
 			if (cityLine == NULL) {
@@ -267,9 +278,23 @@ void *processer( void *args ) {
 				response->length = 3;//+1 for \0
 			}
 			else {
-				response->length = strlen( cityLine ) + 1;
-				response->payload = (char *) malloc( sizeof( char ) * response->length );
-				strcpy( response->payload, cityLine );
+				//response->length = strlen( cityLine ) + 1;
+				//response->payload = (char *) malloc( sizeof( char ) * response->length );
+				//NEW TIM CODE TO FIX cityLine below
+				memset( lineAfterCityName, '\0', sizeof( char ) * 85 );
+				printf("request length:%d\n", request->length );
+				printf("lineAfterCityName line 280 server:%s\n",lineAfterCityName );
+				strncpy ( lineAfterCityName, cityLine + request->length + 1, ( 100 - request->length )); //+1 for the extra comma
+				response->length = strlen( lineAfterCityName );
+
+				//remove newline from lineAfterCityName
+				lineAfterCityNameLength = strlen( lineAfterCityName );
+		        if (lineAfterCityName[ lineAfterCityNameLength - 1 ] == '\n') {
+		            lineAfterCityName[ lineAfterCityNameLength - 1 ] = '\0';
+		        }
+				printf("lineAfterCityName line 280 server:%s\n",lineAfterCityName );
+				strcpy( response->payload, lineAfterCityName );
+				//free( lineAfterCityName );
 			}
 
 			/* Step #9: send back 3 keywords followed by end of response message */
@@ -283,8 +308,11 @@ void *processer( void *args ) {
 
 			//message ENDOFRES
 			clean_message( response );
-			response->id = ENDRES;
-			response->length = 0;
+			//two lines below me were having payload set to 105 for some reason..
+			//response->id = ENDRES;
+			//response->length = 0;
+			//NEWLINE below that fixes (105,0,105) bug
+			response = construct_message( ENDRES, NULL );
 			if(sendMessage( processerClient->socket, response ) == -1) {
 				printf("server malfunction during end of response send to client %s\n", clientAddrPort);
 				break;

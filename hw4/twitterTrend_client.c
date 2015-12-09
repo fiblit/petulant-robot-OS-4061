@@ -29,10 +29,15 @@ int main( int argc, char *argv[] ) {
     }
 
     host_name = argv[ 1 ];
-    if ( strlen( host_name ) > HOST_NAME_MAX )
+    if ( strlen( host_name ) > HOST_NAME_MAX ) {
+        fprintf( stderr, "Error, host name is too long, must be 255 or less characters\n" );
+        return 1;
+    }
 
     for (i = 0; i < ( argc - 3 ); i++ ) {
+        fileArray[ i ] = ( char * ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE );
         fileArray[ i ] = argv[ 3 + i ]; //3+i is all of the file arguments
+        //printf( "Here is fileArray[%d] : %s\n", i, fileArray[ i ] );
     }
 
     //set hints struct to 0 to ensure no garbage values
@@ -79,25 +84,30 @@ int main( int argc, char *argv[] ) {
 
     char *fileName = ( char * ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE );
     char **cityNames = ( char ** ) malloc ( sizeof ( char * ) * MAXCITYSIZE * MAXCITIES );
-    char *cityName;
+    char *cityName = ( char * ) malloc ( sizeof ( char ) * MAXCITYSIZE );
     message_t response_msg;
     for( int k = 0; k < ( argc - 3 ); k++ ) {
         fileName = fileArray[ k ];
         cityNames = getCityNames( fileName );
 
         for (n = 0; cityNames[ n ] != NULL; n++ ) {
-            cityName = ( char * ) malloc ( sizeof ( char ) * MAXCITYSIZE );
+            memset( cityName, 0, ( sizeof ( char ) * MAXCITYSIZE ) );
             cityName = cityNames[ n ];
             twitterTrendRequest( sockfd, cityName );
             response_msg = waitForResponse( sockfd );
+            if ( acknowledgeEndOfResponse( sockfd ) == -1 ) {
+                printf( "Error: an error message was sent or recieved during end of response, exiting\n" );
+                exit( EXIT_FAILURE );
+            }
             if ( response_msg->id == ERRMSG ) { //need to output payload, close the connection, then exit
                 fprintf( stderr, "Received error message from server, closing connection. Payload: %s\n", response_msg->payload );
                 close( sockfd );
                 exit(EXIT_FAILURE);
             }
+            //printf("DEBUGCLIENT1: response_msg->payload : %s\n", response_msg->payload );
 
             writeReportFile( fileName, cityName, response_msg );
-            free( cityName );
+            //free( cityName );
         }
     }
 
@@ -107,6 +117,7 @@ int main( int argc, char *argv[] ) {
 char **getCityNames( char *filepath ) {
     FILE *cityFile;
     int lineCounter = 0;
+    int cityLength;
     if ( filepath == NULL ) { //check to make sure something is in filepath
         errorFunction( "Error : filepath doesn't exist" );
     }
@@ -121,6 +132,10 @@ char **getCityNames( char *filepath ) {
     char *buffer = ( char * ) malloc ( sizeof ( char ) * MAXCITYSIZE );
     while ( fgets( buffer, MAXCITYSIZE, cityFile ) != NULL ) {
         cityNames[ lineCounter ] = ( char * ) malloc ( sizeof ( char ) * MAXCITYSIZE );
+        cityLength = strlen( buffer );
+        if (buffer[ cityLength - 1 ] == '\n') {
+            buffer[ cityLength - 1 ] = '\0';
+        }
         strcpy( cityNames[ lineCounter ], buffer );
         lineCounter++;
     }

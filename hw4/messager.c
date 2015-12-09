@@ -23,7 +23,7 @@ message_t construct_message( int msg_id, char *msg_payload ) {
 	}
 	msg->id = msg_id;
 	if ( msg_id == ERRMSG || msg_id == REQUEST || msg_id == RESPONSE ) {
-		msg->length = strlen( msg_payload ) + 1;//strlen doesn't count \0 IIRC
+		msg->length = strlen( msg_payload ); //+ 1;//strlen doesn't count \0 IIRC
 	}
 	else {
 		msg->length = 0;
@@ -42,8 +42,9 @@ char * build_string_message( message_t msg ) {
 
 char * build_string_request_message( message_t msg ) {
 	char * buffer = ( char * ) malloc ( sizeof ( char ) * MAXLINESIZE + 2 ); //+2 for the added quotes to name of city
-	if (msg->payload != NULL)
+	if (msg->payload != NULL) {
 		snprintf( buffer, MAXLINESIZE, "(%d,%d,\"%s\")", msg->id, msg->length, msg->payload ); //adds quotes to city
+	}
 	else
 		snprintf( buffer, MAXLINESIZE, "(%d,%d,)", msg->id, msg->length );
 	return buffer;
@@ -57,7 +58,7 @@ void clean_message( message_t msg ) {
 
 void destruct_message( message_t msg ) {
 	if ( msg->payload != NULL ) {
-		free( msg->payload );
+		free( msg->payload ); //IS SEGFAULTING ATM
 	}
 	free( msg );
 }
@@ -66,10 +67,13 @@ int sendMessage( int sock_fd, message_t send ) {
 	int bytesSent_id, bytesSent_length, bytesSent_payload;
 	char *id_string = ( char * ) malloc ( sizeof ( char ) * 4 ); //3 chars + '\0'
 	char *length_string = ( char * ) malloc ( sizeof ( char ) * 4 ); //3 chars + '\0'
-	char *payload_string = ( char * ) malloc ( sizeof ( char ) * MAXLINESIZE );
+	char *payload_string = ( char * ) malloc ( sizeof ( char ) * MAXLINESIZE + 1 );
 	sprintf( id_string, "%d", send->id ); //convert id to string for transmission
 	sprintf( length_string, "%d", send->length ); //convert length to string for transmission
-
+	printf("send->payload = %s\n", send->payload );
+	if ( send->payload != NULL ) {
+		strcpy( payload_string, send->payload );
+	}
 	bytesSent_id = write( sock_fd, id_string, sizeof( id_string ) );
 	if ( bytesSent_id < 0 ) {
 		perror( "Error sending id message" );
@@ -95,7 +99,7 @@ int recvMessage( int sock_fd, message_t recv ) {
 	char *id_string = ( char * ) malloc ( sizeof ( char ) * 4 ); //3 chars + '\0'
 	char *length_string = ( char * ) malloc ( sizeof ( char ) * 4 ); //3 chars + '\0'
 	char *payload_string = ( char * ) malloc ( sizeof ( char ) * MAXLINESIZE );
-	clean_message( recv );
+	//clean_message( recv ); //IS SEGFAULTING ATM
 
 	bytesRecv_id = read( sock_fd, id_string, sizeof( id_string ) );
 	if ( bytesRecv_id < 0 ) {
@@ -119,9 +123,10 @@ int recvMessage( int sock_fd, message_t recv ) {
 		return -1;
 	}
 	recv->payload = ( char * ) malloc ( sizeof ( char ) * recv->length );
+	printf("payload_string: %s\n", payload_string);
 	strcpy( recv->payload, payload_string );
 	//recv->payload[recv->length] = '\0';
-	//fprintf(stderr, "\nDEBUG 3: %s\n", recv->payload);
+	fprintf(stderr, "\nDEBUG 3: %s\n", recv->payload);
 
 	free(id_string);
 	free(length_string);
@@ -191,11 +196,13 @@ message_t waitForResponse( int sock_fd ) {
 		close ( sock_fd );
 		exit( EXIT_FAILURE ); //already prints error message in recvMessage if this happens
 	}
+	printf("here it is: %d\n", msg->id );
 	if ( msg->id == ERRMSG ) {
 		return msg; //have to still return to print payload and close connection
 	} else if ( msg->id == RESPONSE ) { //everything works correctly
 		return msg;
 	} else { //any other id is an error
+		printf("here t is: %d\n", msg->id );
 		printf( "Expected twitterTrend response from server, sending error message to server\n" );
 		msg->id = ERRMSG;
 		if ( sendMessage( sock_fd, msg ) == -1 ) { // if write failed on the message
@@ -204,6 +211,26 @@ message_t waitForResponse( int sock_fd ) {
 		};
 		return msg; //return the malformed msg anyways, where we will cancel the connection if server hasn't already
 	}
+}
+
+int acknowledgeEndOfResponse( int sock_fd ) {
+	message_t msg = construct_message_blank();
+	recvMessage( sock_fd, msg );
+	if (msg->id == ERRMSG) {
+		printf( "client detected that server experienced an error during end of response message, closing connection\n" );
+		printf( "Error message payload: %s", msg->payload );
+		close( sock_fd );
+		return -1;
+	}
+	else if ( msg->id != ENDRES ) {
+		printf( "Expected end of response from server, sending error message to server\n" );
+		msg->id = ERRMSG;
+		sendMessage( sock_fd, msg ); // do not need to check if -1 because this will close the client anyways
+		close( sock_fd );
+		return -1;
+	}
+	//else it was successful, return 0
+	return 0;
 }
 
 void endRequest( int sock_fd ) {
