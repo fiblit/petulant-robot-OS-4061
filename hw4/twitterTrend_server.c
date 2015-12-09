@@ -44,8 +44,7 @@ int main( int argc, char *argv[] ) {
 		errorFunction( "Failed to bind to given port" );
 	if ( listen( serverSocket, 50 )  == -1)//TODO: change backlog amount to whatever it needs to be. (100?)
 		errorFunction( "Failed to listen on socket" );
-	else
-		printf("Listening on port %d", publicServerPort);
+	printf( "Listening on port %d\n", publicServerPort);
 
 	/* init data structures */
 	readTwitterDB();
@@ -328,7 +327,7 @@ void *queueer( void *args ) {
 
 		/*output message for acceptance*/
 		{
-			uint32_t ip = htonl( client.sin_addr.s_addr );//I just wanted to localize this temporary variable
+			uint32_t ip = ( client.sin_addr.s_addr );//I just wanted to localize this temporary variable
 			printf( "server accepts connection from %s\n", inet_ntoa( *(struct in_addr *)&ip));
 		}
 		/* note to self: how to break out
