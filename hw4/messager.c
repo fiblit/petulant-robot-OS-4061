@@ -151,7 +151,7 @@ int clientHandShake( int sock_fd ) {
 }
 
 int serverHandShake( int sock_fd, char *addr ) {
-	message_t msg = construct_message( HANDSHAKE, "5" );
+	message_t msg = construct_message( HANDSHAKE, NULL );
 	sendMessage( sock_fd, msg );
 	printf( "server sends handshaking: %s to client %s\n", build_string_message( msg ), addr );
 	recvMessage( sock_fd, msg );
