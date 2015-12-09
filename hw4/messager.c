@@ -86,7 +86,7 @@ int recvMessage( int sock_fd, message_t recv ) {
 	char *length_string = ( char * ) malloc ( sizeof ( char ) * 4 ); //3 chars + '\0'
 	char *payload_string = ( char * ) malloc ( sizeof ( char ) * MAXLINESIZE );
 	clean_message( recv );
-	construct_message_blank( recv );
+	recv = construct_message_blank();
 
 	bytesRecv_id = read( sock_fd, id_string, sizeof( id_string ) );
 	if ( bytesRecv_id < 0 ) {
