@@ -197,7 +197,7 @@ void *processer( void *args ) {
 		}
 
 		// get convenient strings for various output. clientAddrPort is the 127.0.0.1,XXXXX format
-		uint32_t clientAddrInt = htonl( processerClient->address.sin_addr.s_addr );
+		uint32_t clientAddrInt = ( processerClient->address.sin_addr.s_addr );
 		uint16_t clientPortInt = processerClient->address.sin_port;
 		char * clientAddr = inet_ntoa( *(struct in_addr *)&clientAddrInt );
 		char clientPort[ 6 ]; //6 since largest 16 bit unsigned is 65535 which is 5 chars + 1 for null
@@ -316,7 +316,7 @@ void *queueer( void *args ) {
 		int acceptRet;
 		while (((acceptRet = accept( serverSocket, (struct sockaddr *)&client, (socklen_t *)&lenOfClientAddr)) == -1) &&
 			(errno == EINTR))//this loop was influenced by the book p.637. I wouldn't have checked for EINTR and looped before
-			;// <- for the while loop 
+			;// <- for the while loop
 
 		if (acceptRet == -1) {
 
@@ -329,7 +329,7 @@ void *queueer( void *args ) {
 
 		/*output message for acceptance*/
 		{
-			uint32_t ip = htonl( client.sin_addr.s_addr );//I just wanted to localize this temporary variable
+			uint32_t ip = ( client.sin_addr.s_addr );//I just wanted to localize this temporary variable
 			printf( "server accepts connection from %s\n", inet_ntoa( *(struct in_addr *)&ip));
 		}
 		/* note to self: how to break out
