@@ -4,7 +4,6 @@
 
 #include "queue.h"
 
-
 /* construct q, int is for errors */
 queue_t queue_construct() {
 	queue_t q = (queue_t) malloc( sizeof( queue_queue ) );
@@ -33,7 +32,7 @@ queueNode_t queueNode_construct() {
 	queueClientInfo_t qci = (queueClientInfo_t) malloc( sizeof( queueClientInfo ) );
 	qn->client = qci;
 	qn->client->socket = -1;
-	qn->client->address = NULL;
+	memset(&(qn->client->address), 0, sizeof( struct sockaddr_in ) );
 	return qn;
 }
 
@@ -50,7 +49,7 @@ void queueNode_destruct( queueNode_t qn ) {
 }
 
 /* adds item to the tail of the queue */
-void queue_enqueue( queue_t q, int socket, struct in_addr address ) {
+void queue_enqueue( queue_t q, int socket, struct sockaddr_in address ) {
 	queueNode_t qn = queueNode_construct();
 	qn->client->socket = socket;
 	qn->client->address = address;
@@ -88,10 +87,11 @@ queueClientInfo_t queue_dequeue( queue_t q ) {
 		queueNode_destruct( oldHead );
 		q->size--;
 
-		return ret;
+		return info;
 	}
 	else {
 		fprintf( stderr, "Attempted to dequeue an empty queue\n" );
 		exit( EXIT_FAILURE );//TODO: return/check for errno so we can print the culprit thread
 	}
+	return NULL;
 }

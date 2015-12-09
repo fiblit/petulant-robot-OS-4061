@@ -140,21 +140,16 @@ void openInFile( char *inFileName ) {
 
 void *processer( void *args ) {
 	int id = *((int *) args);
-	int cityLength;
-	int lastCharOfCity;
+	//int cityLength;
+	//int lastCharOfCity;
 	int semValue;
-	FILE *cityFile;
-	/* done later with more accuracy
-	char *cityBuf = ( char * ) malloc ( sizeof ( char ) * 16 ); //cityNames will be less than 15 characters
-	if ( cityBuf == NULL ) { //malloc error checking
-		errorFunction ( "Call to malloc failed in processer" );
-	}
-	*/
-
+	//FILE *cityFile;
+/*
 	char *lineAfterCityName = ( char * ) malloc ( sizeof ( char ) * 85 ); //will be contents of cityLine after the cityName
  	if ( lineAfterCityName == NULL ) { //malloc error checking
 		errorFunction ( "Call to malloc failed in processer" );
 	}
+*/
 
 	char *cityLine = ( char * ) malloc ( sizeof ( char ) * 100 ); //every line in TwitterDB is less than 100 characters
 	if ( cityLine == NULL ) { //malloc error checking
@@ -226,16 +221,21 @@ void *processer( void *args ) {
 
 			/* Step #7: wait for request*/
 			message_t request = construct_message_blank();
-			request = recvMessage( processerClient->socket, request );
+			if (recvMessage( processerClient->socket, request ) == -1) {
+				destruct_message(request);
+				break;
+			}
 			
 			message_t response = construct_message_blank();
 			if (request->id == ERRMSG) {
 				printf( "server detected a client error: %s, from client %s\n\tclosing connection\n", request->payload, clientAddrPort);
+				destruct_message(request);
 				destruct_message(response);
 				break;
 				//goes on to close client
 			}
 			else if (request->id != ENDREQ) {
+				destruct_message(request);
 				destruct_message(response);
 				break;
 				//goes on to close client
@@ -247,6 +247,7 @@ void *processer( void *args ) {
 				if(sendMessage( processerClient->socket, response ) == -1) {
 					printf( "server failed to notify client %s of its malfunction, continuing with close\n", clientAddrPort );
 				}	
+				destruct_message(request);
 				destruct_message(response);
 				break;
 				//goes on to close client
@@ -254,7 +255,7 @@ void *processer( void *args ) {
 			//otherwise successfull request
 
 			//store city request
-			cityBuf = (char *) malloc( sizeof( char ) * request->length );
+			char * cityBuf = (char *) malloc( sizeof( char ) * request->length );
 
 			/* Step #8: find keywords */
 			cityLine = TwitterDBMem_getCityKwd( tdbm, cityBuf );
@@ -296,7 +297,7 @@ void *processer( void *args ) {
 		/* Step #11: close the connection with client */
 		printf( "Thread %d is finished handling client %s\n", id, clientAddrPort );
 		printf( "server closes the connection from client %s\n", clientAddrPort );
-		close( processer->socket );
+		close( processerClient->socket );
 	}
 
 	return NULL;
