@@ -66,6 +66,7 @@ int sendMessage( int sock_fd, message_t send ) {
 	int bytesSent_id, bytesSent_length, bytesSent_payload;
 	char *id_string = ( char * ) malloc ( sizeof ( char ) * 4 ); //3 chars + '\0'
 	char *length_string = ( char * ) malloc ( sizeof ( char ) * 4 ); //3 chars + '\0'
+	char *payload_string = ( char * ) malloc ( sizeof ( char ) * MAXLINESIZE );
 	sprintf( id_string, "%d", send->id ); //convert id to string for transmission
 	sprintf( length_string, "%d", send->length ); //convert length to string for transmission
 
@@ -81,7 +82,7 @@ int sendMessage( int sock_fd, message_t send ) {
 		return -1;
 	}
 
-	bytesSent_payload = write( sock_fd, send->payload, sizeof( send->payload ) );
+	bytesSent_payload = write( sock_fd, payload_string, sizeof( payload_string ) );
 	if ( bytesSent_payload < 0 ) {
 		perror( "Error sending payload message" );
 		return -1;
