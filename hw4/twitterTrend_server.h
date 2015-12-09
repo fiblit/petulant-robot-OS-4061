@@ -16,10 +16,12 @@
 #include <unistd.h>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <arpa/inet.h>
 
 #include "twitterDBMem.h"
 #include "queue.h"
 #include "errorFunction.h"
+#include "messager.h"
 
 #define TWITTERDB_FILENAME "TwitterDB.txt"
 #define MAXCITYNAMELENGTH 15

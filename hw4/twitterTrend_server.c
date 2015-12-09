@@ -10,7 +10,7 @@ int main( int argc, char *argv[] ) {
 	/* init public server socket */
 	int serverSocket = socket( AF_INET, SOCK_STREAM, 0 );//SOCK_STREAM = TCP protocol
 	if (serverSocket == -1)
-		errorMessage( "Failed to create server socket" );
+		errorFunction( "Failed to create server socket" );//TODO: change error____ to handleError(errno,"___",void *args), which is in a file that handles errors
 
 	/* get args */
 	int num_threads;
@@ -40,10 +40,10 @@ int main( int argc, char *argv[] ) {
 	serverAddr.sin_family = AF_INET;
 	serverAddr.sin_port = htons((short)publicServerPort);
 	serverAddr.sin_addr.s_addr = htonl( INADDR_ANY );
-	if ( bind( serverSocket, (struct sockadder *)&serverAddr, sizeof(serverAddr) ) == -1)
-		errorMessage( "Failed to bind to given port" );
+	if ( bind( serverSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr) ) == -1)
+		errorFunction( "Failed to bind to given port" );
 	if ( listen( serverSocket, 50 )  == -1)//TODO: change backlog amount to whatever it needs to be. (100?)
-		errorMessage( "Failed to listen on socket" );
+		errorFunction( "Failed to listen on socket" );
 	else
 		printf("Listening on port %d", publicServerPort);
 
