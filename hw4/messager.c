@@ -55,23 +55,57 @@ void destruct_message( message_t msg ) {
 
 //TODO: fix the payload nullification
 int sendMessage( int sock_fd, message_t send ) {
-	int bytesSent;
-	bytesSent = write( sock_fd, send, sizeof( send ) );
-	if ( bytesSent < 0 ) {
-		errorFunction( "Error sending message" );
+	int bytesSent_id, bytesSent_length, bytesSent_payload;
+	char *id_string = ( char * ) malloc ( sizeof ( char ) * 4 ); //3 chars + '\0'
+	char *length_string = ( char * ) malloc ( sizeof ( char ) * 4 ); //3 chars + '\0'
+	sprintf( id_string, "%d", send->id ); //convert id to string for transmission
+	sprintf( length_string, "%d", send->length ); //convert length to string for transmission
+
+	bytesSent_id = write( sock_fd, id_string, sizeof( id_string ) );
+	if ( bytesSent_id < 0 ) {
+		errorFunction( "Error sending id message" );
 	}
-	return bytesSent;
+
+	bytesSent_length = write( sock_fd, length_string, sizeof( length_string ) );
+	if ( bytesSent_length < 0 ) {
+		errorFunction( "Error sending length message" );
+	}
+
+	bytesSent_payload = write( sock_fd, send->payload, sizeof( send->payload ) );
+	if ( bytesSent_payload < 0 ) {
+		errorFunction( "Error sending payload message" );
+	}
+
+	return bytesSent_id + bytesSent_length + bytesSent_payload;
 }
 
 //TODO: fix the payload nullification
 int recvMessage( int sock_fd, message_t recv ) {
-	int bytesRecv;
+	int bytesRecv_id, bytesRecv_length, bytesRecv_payload;
+	char *id_string = ( char * ) malloc ( sizeof ( char ) * 4 ); //3 chars + '\0'
+	char *length_string = ( char * ) malloc ( sizeof ( char ) * 4 ); //3 chars + '\0'
+	char *payload_string = ( char * ) malloc ( sizeof ( char ) * MAXLINESIZE );
 	clean_message( recv );
-	bytesRecv = read( sock_fd, recv, MAXLINESIZE );
-	if ( bytesRecv < 0 ) {
-		errorFunction( "Error receiving message" );
+
+	bytesRecv_id = read( sock_fd, id_string, sizeof( id_string ) );
+	if ( bytesRecv_id < 0 ) {
+		errorFunction( "Error receiving id message" );
 	}
-	return bytesRecv;
+	recv->id = atoi( id_string );
+
+	bytesRecv_length = read( sock_fd, length_string, sizeof( length_string ) );
+	if ( bytesRecv_length < 0 ) {
+		errorFunction( "Error receiving length message" );
+	}
+	recv->id = atoi( length_string );
+
+	bytesRecv_payload = read( sock_fd, payload_string, sizeof( payload_string ) );
+	if ( bytesRecv_payload < 0 ) {
+		errorFunction( "Error receiving payload message" );
+	}
+	recv->payload = payload_string;
+
+	return bytesRecv_id + bytesRecv_length + bytesRecv_payload;
 }
 
 int clientHandShake( int sock_fd ) {
