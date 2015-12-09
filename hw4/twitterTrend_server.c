@@ -161,10 +161,7 @@ void *processer( void *args ) {
 		errorFunction ( "Call to malloc failed in processer" );
 	}
 
-	char *processerFileName = ( char * ) malloc ( sizeof ( char ) * 15); //should be big enough for the name "clientX.txt"
-	if ( processerFileName == NULL ) { //malloc error checking
-		errorFunction ( "Call to malloc failed in processer" );
-	}
+	queueClientInfo_t processerClient;
 
 	char *originalFileName = ( char * ) malloc ( sizeof ( char ) * 15); //should be big enough for the name "clientX.txt"
 	if ( originalFileName == NULL ) { //malloc error checking
@@ -200,7 +197,7 @@ void *processer( void *args ) {
 		 * The messages would start at "Step 7: Wait for twitterTrend request"
 		 */
 		//TODO: we also need to embed all of this in another while loop since it is not just one city being read. (function PLZ)
-		processerFileName = queue_dequeue ( queue ); //store the file name of the client
+		processerClient = queue_dequeue ( queue ); //store the file name of the client
 
 		//release access to queue
 		if ( sem_post( &mut ) != 0 ) {
@@ -208,7 +205,20 @@ void *processer( void *args ) {
 			exit( EXIT_FAILURE );
 		}
 
+		uint32_t clientAddrInt = htonl( processerClient->addr.sin_addr.s_addr );
+		uint16_t clientPortInt = processerClient->addr.sin_port; 
+		char * clientAddr = inet_ntoa( clientAddrVal );
+		char clientPort[ 6 ]; //6 since largest 16 bit unsigned is 65535 which is 5 chars + 1 for null
+		sprintf( clientPort, "%u", clientPortInt );
+		char * clientAddrPort = (char *) malloc( sizeof( char ) * (strlen(clientAddr) + 1 + 6) );//the 6 includes a null char, the 1 is a comma
+		clientAddrPort = strcat( strcat( strcat( clientAddrPort, clientAddr ), ","), clientPort );
+
 		//TODO: handshake with client STEP 5/6
+
+		if (serverHandShake( processerClient->socket, clientAddrPort ) == -1) {
+			fprintf(stderr, "server failed to complete handshake\n" );
+			break;
+		}
 
 		strcpy ( originalFileName, processerFileName ); //to makesure finished message outputs correctly;
 		printf( "Thread %d is handling client %s\n", id, processerFileName );//TODO: change filename to client info
@@ -243,20 +253,6 @@ void *processer( void *args ) {
 		strncpy ( lineAfterCityName, cityLine + cityLength + 1, ( 100 - cityLength )); //+1 for the extra comma
 
 		//free( cityLine );
-
-		//create result file //TODO: move to client, it handles writing to .result
-		strcat( processerFileName, ".result" ); //create name of result file
-		resultFile = fopen ( processerFileName, "w+" ); //w+ mode will create the file
-
-		//write the city name, then put the : and two spaces in, then put the lineAfterCityName in, then add \n //TODO: move to client, it handles writing to files
-		lineAfterCityNameLength = strlen ( lineAfterCityName );
-		fwrite ( cityBuf, sizeof ( char ), cityLength, resultFile );
-		fputc ( ' ', resultFile );
-		fputc ( ':', resultFile );
-		fputc ( ' ', resultFile );
-		fwrite ( lineAfterCityName, sizeof ( char ), lineAfterCityNameLength, resultFile );
-		fputc ( '\n', resultFile );
-		fclose ( resultFile );
 
 		//TODO: once done do step #11 (also output to stdout that we are responding)
 		printf( "Thread %d is finished handling client %s\n", id, originalFileName );//TODO: change filename to client info

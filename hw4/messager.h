@@ -40,10 +40,6 @@ void clean_message( message_t msg);
 
 void destruct_message( message_t msg );
 
-//TODO: these need to have some network headers included
-/* Note: sorry I basically did nothing I meant to get more done but I
-   got distracted */
-
 int sendMessage( int sock_fd, message_t send );
 
 int recvMessage( int sock_fd, message_t recv );
