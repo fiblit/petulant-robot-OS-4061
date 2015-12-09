@@ -29,6 +29,7 @@ int main( int argc, char *argv[] ) {
     }
 
     host_name = argv[ 1 ];
+
     if ( strlen( host_name ) > HOST_NAME_MAX ) {
         fprintf( stderr, "Error, host name is too long, must be 255 or less characters\n" );
         return 1;
@@ -82,12 +83,13 @@ int main( int argc, char *argv[] ) {
         exit( EXIT_FAILURE );
     }
 
-    char *fileName = ( char * ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE );
+    char *fileName;
     char **cityNames = ( char ** ) malloc ( sizeof ( char * ) * MAXCITYSIZE * MAXCITIES );
     char *cityName = ( char * ) malloc ( sizeof ( char ) * MAXCITYSIZE );
     message_t response_msg;
     for( int k = 0; k < ( argc - 3 ); k++ ) {
         fileName = fileArray[ k ];
+		printf("%s\n",fileName);
         cityNames = getCityNames( fileName );
 
         for (n = 0; cityNames[ n ] != NULL; n++ ) {

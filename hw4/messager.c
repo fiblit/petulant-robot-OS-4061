@@ -107,7 +107,7 @@ int recvMessage( int sock_fd, message_t recv ) {
 		return -1;
 	}
 	recv->id = atoi( id_string );
-	//fprintf(stderr, "\nDEBUG 1: %d\n", recv->id);
+	fprintf(stderr, "\nDEBUG 1: %d\n", recv->id);
 
 	bytesRecv_length = read( sock_fd, length_string, sizeof( length_string ) );
 	if ( bytesRecv_length < 0 ) {
@@ -115,7 +115,7 @@ int recvMessage( int sock_fd, message_t recv ) {
 		return -1;
 	}
 	recv->length = atoi( length_string );
-	//fprintf(stderr, "\nDEBUG 2: %d\n", recv->length);
+	fprintf(stderr, "\nDEBUG 2: %d\n", recv->length);
 
 	bytesRecv_payload = read( sock_fd, payload_string, sizeof( payload_string ) );
 	if ( bytesRecv_payload < 0 ) {
