@@ -8,7 +8,7 @@
 int main( int argc, char *argv[] ) {
 
 	/* init public server socket */
-	int serverSocket = socket( AF_INET, SOCK_STREAM, 0 );//SOCK_STREAM = TCP protocol
+	serverSocket = socket( AF_INET, SOCK_STREAM, 0 );//SOCK_STREAM = TCP protocol
 	if (serverSocket == -1)
 		errorFunction( "Failed to create server socket" );//TODO: change error____ to handleError(errno,"___",void *args), which is in a file that handles errors
 
@@ -57,10 +57,12 @@ int main( int argc, char *argv[] ) {
 		perror( "Semaphore initialization failed" );
 		return 1;
 	}
+	/*deprecated: unbounded
 	if ( sem_init( &empty_slots, 0, num_threads ) != 0 ) {//the buffer/queue is bounded by num_threads
 		perror( "Semaphore initialization failed" );
 		return 1;
 	}
+	*/
 	if ( sem_init(&mut, 0, 1) != 0) {
 		perror( "Semaphore initialization failed" );
 		return 1;
@@ -258,19 +260,21 @@ void *processer( void *args ) {
 		printf( "Thread %d is finished handling client %s\n", id, originalFileName );//TODO: change filename to client info
 
 		//post that there is another empty slot
+		/*Deprecated: unbounded
 		if ( sem_post( &empty_slots ) != 0 ) {
 			perror( "Error occured while posting to a semaphore" );
 			exit( EXIT_FAILURE );
 		}
+		*/
 	}
 
 	return NULL;
 }
 
 void *queueer( void *args ) {
-	int id = *((int *) args);
+	//int id = *((int *) args);//note: id is never used
 
-	//Keep enqueueing until we break from having no more items
+	//Keep enqueueing until we break from having no more clients? (<- not sure when this happens)
 	while ( 1 ) {
 
 		//TODO: accept client
@@ -278,6 +282,7 @@ void *queueer( void *args ) {
 		//TODO: handshake with client <- FUNCTION (in the process making a new port with client?)
 
 		//test if the queue has slots to fill
+		/*Deprecated: server is now unbounded
 		if ( sem_trywait( &empty_slots ) != 0 && errno == EAGAIN ) {
 			if ( errno == EAGAIN ) { //we're just at 0
 				fprintf( stderr, "Waiting to add items to the full queue\n" );
@@ -291,7 +296,7 @@ void *queueer( void *args ) {
 				perror( "An error occured while the queueer was trying to wait" );
 				exit( EXIT_FAILURE );
 			}
-		}
+		}*/
 
 		//TODO: replace reading from inFile with placing client info on queue
 		char c = fgetc( inFile );
@@ -315,14 +320,12 @@ void *queueer( void *args ) {
 
 			//release access to queue
 			if ( sem_post( &mut ) != 0 ) {
-				perror( "Error occured while releasing semaphore lock" );
-				exit( EXIT_FAILURE );
+				errorFunction( "Error occured while releasing semaphore lock" );
 			}
-
+			
 			//this is a nasty hack
 			if ( sem_post( &full_slots ) != 0 ) {
-				perror( "Error occurred while posting to a semaphore" );
-				exit( EXIT_FAILURE );
+				errorFunction( "Error occurred while posting to a semaphore" );
 			}
 			break;//no more items to add
 		}
@@ -335,8 +338,7 @@ void *queueer( void *args ) {
 
 		//Lock access to queue
 		if ( sem_wait( &mut ) != 0 ) {//TODO: turn these validators into functions
-			perror( "Error occured while acquiring semaphore lock" );
-			exit( EXIT_FAILURE );
+			errorFunction( "Error occured while acquiring semaphore lock" );
 		}
 		queue_enqueue( queue, newItem );
 
@@ -344,14 +346,12 @@ void *queueer( void *args ) {
 
 		//release access to queue
 		if ( sem_post( &mut ) != 0 ) {
-			perror( "Error occured while releasing semaphore lock" );
-			exit( EXIT_FAILURE );
+			errorFunction( "Error occured while releasing semaphore lock" );
 		}
 
 		//post that there is another full slot
 		if ( sem_post( &full_slots ) != 0 ) {
-			perror( "Error occured while posting to a semaphore" );
-			exit( EXIT_FAILURE );
+			errorFunction( "Error occured while posting to a semaphore" );
 		}
 	}
 

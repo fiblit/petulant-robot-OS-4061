@@ -28,12 +28,14 @@
 
 /* global variables */
 sem_t full_slots;
-sem_t empty_slots;
+/*Deprecated: Unbounded
+sem_t empty_slots;*/
 sem_t mut;
 queue_t queue;
 TwitterDBMem_t tdbm;
 FILE *inFile;
 bool globalQueue;
+int serverSocket;
 /* <insert global variables> */
 
 /* Reads TwitterDB.txt into the tdbm struct */
