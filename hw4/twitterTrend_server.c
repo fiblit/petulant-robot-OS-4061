@@ -7,15 +7,10 @@
 /* does initial processing, in particular, it starts the threads */
 int main( int argc, char *argv[] ) {
 
-	/* init public server socket */
-	serverSocket = socket( AF_INET, SOCK_STREAM, 0 );//SOCK_STREAM = TCP protocol
-	if (serverSocket == -1)
-		errorFunction( "Failed to create server socket" );//TODO: change error____ to handleError(errno,"___",void *args), which is in a file that handles errors
-
 	/* get args */
 	int num_threads;
 	int publicServerPort;
-	if ( argc > 3 || argc < 2) { // invalid range
+	if ( argc != 3 && argc != 2) { // invalid range
 		fprintf( stderr, "Incorrect usage.\n" );
 		fprintf( stderr, "\tUsage: %s <port_number> [num_threads = 5]\n", argv[ 0 ] );
 		return 1;
@@ -32,8 +27,13 @@ int main( int argc, char *argv[] ) {
 				errorFunction( "num_threads is less than or equal to 0, exiting" );
 			}
 		}
-		publicServerPort = atoi( argv[ 3 ] );
+		publicServerPort = atoi( argv[ 1 ] );
 	}
+
+	/* init public server socket */
+	serverSocket = socket( AF_INET, SOCK_STREAM, 0 );//SOCK_STREAM = TCP protocol
+	if (serverSocket == -1)
+		errorFunction( "Failed to create server socket" );//TODO: change error____ to handleError(errno,"___",void *args), which is in a file that handles errors
 
 	/* bind socket to port and listen */
 	struct sockaddr_in serverAddr;
