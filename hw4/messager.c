@@ -87,7 +87,6 @@ int sendMessage( int sock_fd, message_t send ) {
 		perror( "Error sending payload message" );
 		return -1;
 	}
-
 	return bytesSent_id + bytesSent_length + bytesSent_payload;
 }
 
@@ -152,7 +151,7 @@ int clientHandShake( int sock_fd ) {
 }
 
 int serverHandShake( int sock_fd, char *addr ) {
-	message_t msg = construct_message( HANDSHAKE, NULL );
+	message_t msg = construct_message( HANDSHAKE, "5" );
 	sendMessage( sock_fd, msg );
 	printf( "server sends handshaking: %s to client %s\n", build_string_message( msg ), addr );
 	recvMessage( sock_fd, msg );

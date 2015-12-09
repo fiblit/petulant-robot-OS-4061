@@ -314,8 +314,10 @@ void *queueer( void *args ) {
 		int lenOfClientAddr = sizeof( struct sockaddr * );
 
 		int acceptRet;
-		while ((acceptRet = accept( serverSocket, (struct sockaddr *)&client, (socklen_t *)&lenOfClientAddr) == -1) &&
+		while (((acceptRet = accept( serverSocket, (struct sockaddr *)&client, (socklen_t *)&lenOfClientAddr)) == -1) &&
 			(errno == EINTR))//this loop was influenced by the book p.637. I wouldn't have checked for EINTR and looped before
+			;// <- for the while loop 
+
 		if (acceptRet == -1) {
 
 			//failed to accept try again
@@ -327,7 +329,7 @@ void *queueer( void *args ) {
 
 		/*output message for acceptance*/
 		{
-			uint32_t ip = ( client.sin_addr.s_addr );//I just wanted to localize this temporary variable
+			uint32_t ip = htonl( client.sin_addr.s_addr );//I just wanted to localize this temporary variable
 			printf( "server accepts connection from %s\n", inet_ntoa( *(struct in_addr *)&ip));
 		}
 		/* note to self: how to break out
