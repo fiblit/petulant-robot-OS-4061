@@ -10,7 +10,7 @@
 #include "twitterTrend_client.h"
 
 int main( int argc, char *argv[] ) {
-    int sockfd, getaddrinfo_rv, i, n;
+    int sockfd, getaddrinfo_rv, i, n, port_check;
     struct addrinfo hints;
     struct addrinfo *serv_info, *p;
     char *portno = ( char * ) malloc ( sizeof ( char ) * MAXPORTNOSIZE );
@@ -21,6 +21,15 @@ int main( int argc, char *argv[] ) {
         fprintf( stderr, "Usage : %s <hostname> <port number> <file_path(s)>\n", argv[ 0 ] );
         return 1;
     }
+
+    port_check = atoi( argv[ 2 ] );
+    if ( port_check < 0 || port_check > 65535 ) {
+        fprintf( stderr, "Error, port number must be above 0 and below 65535\n" );
+        return 1;
+    }
+
+    host_name = argv[ 1 ];
+    if ( strlen( host_name ) > HOST_NAME_MAX )
 
     for (i = 0; i < ( argc - 3 ); i++ ) {
         fileArray[ i ] = argv[ 3 + i ]; //3+i is all of the file arguments
@@ -63,7 +72,10 @@ int main( int argc, char *argv[] ) {
 
     printf( "client connects\n" ); //displayed when connection successful
 
-    clientHandShake( sockfd );
+    if ( clientHandShake( sockfd ) == -1 ) {
+        printf( "Error: an error message was sent or recieved during handshake, exiting\n" );
+        exit( EXIT_FAILURE );
+    }
 
     char *fileName = ( char * ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE );
     char **cityNames = ( char ** ) malloc ( sizeof ( char * ) * MAXCITYSIZE * MAXCITIES );
@@ -76,12 +88,12 @@ int main( int argc, char *argv[] ) {
         for (n = 0; cityNames[ n ] != NULL; n++ ) {
             cityName = ( char * ) malloc ( sizeof ( char ) * MAXCITYSIZE );
             cityName = cityNames[ n ];
-            printf( "Here is cityname currently at %d, %s", n, cityNames[ n ] );
             twitterTrendRequest( sockfd, cityName );
             response_msg = waitForResponse( sockfd );
-            if ( response_msg->id == ERRMSG ) {
-                fprintf( stderr, "Received error message, closing connection. Payload: %s\n", response_msg->payload );
+            if ( response_msg->id == ERRMSG ) { //need to output payload, close the connection, then exit
+                fprintf( stderr, "Received error message from server, closing connection. Payload: %s\n", response_msg->payload );
                 close( sockfd );
+                exit(EXIT_FAILURE);
             }
 
             writeReportFile( fileName, cityName, response_msg );
@@ -96,7 +108,7 @@ char **getCityNames( char *filepath ) {
     FILE *cityFile;
     int lineCounter = 0;
     if ( filepath == NULL ) { //check to make sure something is in filepath
-        errorFunction( "Error : filepath is NULL, fopen would have segfaulted" );
+        errorFunction( "Error : filepath doesn't exist" );
     }
     else {
         if ( access ( filepath, F_OK ) != -1 ) {  //check if file exists, if it does open it
@@ -110,13 +122,7 @@ char **getCityNames( char *filepath ) {
     while ( fgets( buffer, MAXCITYSIZE, cityFile ) != NULL ) {
         cityNames[ lineCounter ] = ( char * ) malloc ( sizeof ( char ) * MAXCITYSIZE );
         strcpy( cityNames[ lineCounter ], buffer );
-        printf( "%d: %s", lineCounter, cityNames[ lineCounter ] );
         lineCounter++;
-    }
-
-    //for debugging purposes
-    for(int j = 0; j < lineCounter; j++ ) {
-        fprintf(stderr, "%d, %s", j, cityNames[ j ] );
     }
 
     fclose( cityFile );
