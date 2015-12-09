@@ -199,7 +199,7 @@ void *processer( void *args ) {
 
 		// get convenient strings for various output. clientAddrPort is the 127.0.0.1,XXXXX format
 		uint32_t clientAddrInt = htonl( processerClient->address.sin_addr.s_addr );
-		uint16_t clientPortInt = processerClient->address.sin_port; 
+		uint16_t clientPortInt = processerClient->address.sin_port;
 		char * clientAddr = inet_ntoa( *(struct in_addr *)&clientAddrInt );
 		char clientPort[ 6 ]; //6 since largest 16 bit unsigned is 65535 which is 5 chars + 1 for null
 		sprintf( clientPort, "%u", clientPortInt );
@@ -225,7 +225,7 @@ void *processer( void *args ) {
 				destruct_message(request);
 				break;
 			}
-			
+
 			message_t response = construct_message_blank();
 			if (request->id == ERRMSG) {
 				printf( "server detected a client error: %s, from client %s\n\tclosing connection\n", request->payload, clientAddrPort);
@@ -246,7 +246,7 @@ void *processer( void *args ) {
 				response->length = strlen(response->payload) + 1;
 				if(sendMessage( processerClient->socket, response ) == -1) {
 					printf( "server failed to notify client %s of its malfunction, continuing with close\n", clientAddrPort );
-				}	
+				}
 				destruct_message(request);
 				destruct_message(response);
 				break;
@@ -280,7 +280,7 @@ void *processer( void *args ) {
 				break;
 				//goes on to close client
 			}
-			printf("server sends twitterTrend response: %s\n", build_string_message( response ) ); 
+			printf("server sends twitterTrend response: %s\n", build_string_message( response ) );
 
 			//message ENDOFRES
 			clean_message( response );
