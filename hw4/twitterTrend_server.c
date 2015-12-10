@@ -203,6 +203,7 @@ void *processer( void *args ) {
 		char clientPort[ 6 ]; //6 since largest 16 bit unsigned is 65535 which is 5 chars + 1 for null
 		sprintf( clientPort, "%u", clientPortInt );
 		char * clientAddrPort = (char *) malloc( sizeof( char ) * (strlen(clientAddr) + 1 + 6) );//the 6 includes a null char, the 1 is a comma
+		clientAddrPort[0] = '\0';
 		clientAddrPort = strcat( strcat( strcat( clientAddrPort, clientAddr ), ","), clientPort );
 
 		/* handshake with client STEP 5/6 */
