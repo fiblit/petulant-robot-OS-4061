@@ -70,7 +70,9 @@ int sendMessage( int sock_fd, message_t send ) {
 	char *payload_string = ( char * ) malloc ( sizeof ( char ) * MAXLINESIZE + 1 );
 	sprintf( id_string, "%d", send->id ); //convert id to string for transmission
 	sprintf( length_string, "%d", send->length ); //convert length to string for transmission
+	/*
 	printf("send->payload = \"%s\"\n", send->payload );
+	*/
 	if ( send->payload != NULL ) {
 		strcpy( payload_string, send->payload );
 	}
@@ -86,7 +88,7 @@ int sendMessage( int sock_fd, message_t send ) {
 		return -1;
 	}
 
-	bytesSent_payload = write( sock_fd, payload_string, send->length );
+	bytesSent_payload = write( sock_fd, payload_string, send->length);
 	if ( bytesSent_payload < 0 ) {
 		perror( "Error sending payload message" );
 		return -1;
@@ -107,7 +109,9 @@ int recvMessage( int sock_fd, message_t recv ) {
 		return -1;
 	}
 	recv->id = atoi( id_string );
+	/*
 	fprintf(stderr, "\nDEBUG 1: %d\n", recv->id);
+	*/
 
 	bytesRecv_length = read( sock_fd, length_string, sizeof( length_string ) );
 	if ( bytesRecv_length < 0 ) {
@@ -115,18 +119,24 @@ int recvMessage( int sock_fd, message_t recv ) {
 		return -1;
 	}
 	recv->length = atoi( length_string );
+	/*
 	fprintf(stderr, "\nDEBUG 2: %d, %d\n", recv->length, MAXLINESIZE);
+	*/
 
-	bytesRecv_payload = read( sock_fd, payload_string, recv->length );
+	bytesRecv_payload = read( sock_fd, payload_string, recv->length);
 	if ( bytesRecv_payload < 0 ) {
 		perror( "Error receiving payload message" );
 		return -1;
 	}
 	recv->payload = ( char * ) malloc ( sizeof ( char ) * recv->length );
+	/*
 	printf("payload_string: \"%s\"\n", payload_string);
-	strcpy( recv->payload, payload_string );
+	*/
+	strcpy( recv->payload, payload_string);
 	//recv->payload[recv->length] = '\0';
+	/*
 	fprintf(stderr, "\nDEBUG 3: \"%s\"\n", recv->payload);
+	*/
 
 	free(id_string);
 	free(length_string);
@@ -196,13 +206,17 @@ message_t waitForResponse( int sock_fd ) {
 		close ( sock_fd );
 		exit( EXIT_FAILURE ); //already prints error message in recvMessage if this happens
 	}
+	/*
 	printf("here it is: %d\n", msg->id );
+	*/
 	if ( msg->id == ERRMSG ) {
 		return msg; //have to still return to print payload and close connection
 	} else if ( msg->id == RESPONSE ) { //everything works correctly
 		return msg;
 	} else { //any other id is an error
+		/*
 		printf("here t is: %d\n", msg->id );
+		*/
 		printf( "Expected twitterTrend response from server, sending error message to server\n" );
 		msg->id = ERRMSG;
 		if ( sendMessage( sock_fd, msg ) == -1 ) { // if write failed on the message

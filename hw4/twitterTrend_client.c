@@ -89,7 +89,6 @@ int main( int argc, char *argv[] ) {
     message_t response_msg;
     for( int k = 0; k < ( argc - 3 ); k++ ) {
         fileName = fileArray[ k ];
-		printf("%s\n",fileName);
         cityNames = getCityNames( fileName );
 
     	FILE *reportFile;
