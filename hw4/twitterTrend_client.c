@@ -24,8 +24,8 @@ int main( int argc, char *argv[] ) {
 
     port_check = atoi( argv[ 2 ] );
     if ( port_check < 0 || port_check > 65535 ) {
-        fprintf( stderr, "Error, port number must be above 0 and below 65535\n" );
-        return 1;
+        errno = EINVAL;
+        errorFunction( "port number is less than 0 or greater than 65535, exiting" );
     }
 
     host_name = argv[ 1 ];
@@ -38,13 +38,11 @@ int main( int argc, char *argv[] ) {
     for (i = 0; i < ( argc - 3 ); i++ ) {
         fileArray[ i ] = ( char * ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE );
         fileArray[ i ] = argv[ 3 + i ]; //3+i is all of the file arguments
-        //printf( "Here is fileArray[%d] : %s\n", i, fileArray[ i ] );
     }
 
     //set hints struct to 0 to ensure no garbage values
     memset( &hints, 0, sizeof ( hints ) );
     portno = argv[ 2 ];
-    host_name = argv[ 1 ];
 
     hints.ai_family = AF_INET;
     hints.ai_socktype = SOCK_STREAM;
@@ -93,7 +91,7 @@ int main( int argc, char *argv[] ) {
 
     	FILE *reportFile;
     	char *reportFileName = ( char * ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE );
-    	strcpy( reportFileName, fileName ); 
+    	strcpy( reportFileName, fileName );
 		strcat( reportFileName, ".result" ); //create name of result file
     	reportFile = fopen( reportFileName, "w+" ); //w+ is truncate read&write
 
@@ -111,10 +109,8 @@ int main( int argc, char *argv[] ) {
                 close( sockfd );
                 exit(EXIT_FAILURE);
             }
-            //printf("DEBUGCLIENT1: response_msg->payload : %s\n", response_msg->payload );
 
             writeReportFile( reportFile, cityName, response_msg );
-            //free( cityName );
         }
 
 		fclose( reportFile );

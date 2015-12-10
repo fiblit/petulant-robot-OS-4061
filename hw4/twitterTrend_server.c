@@ -28,6 +28,10 @@ int main( int argc, char *argv[] ) {
 			}
 		}
 		publicServerPort = atoi( argv[ 1 ] );
+		if ( publicServerPort < 0 || publicServerPort > 65535 ) {
+			errno = EINVAL;
+			errorFunction( "port number is less than 0 or greater than 65535, exiting" );
+	    }
 	}
 
 	/* init public server socket */
@@ -297,7 +301,7 @@ void *processer( void *args ) {
 				break;
 				//goes on to close client
 			}
-			printf("server sends twitterTrend response: %s\n", build_string_message( response ) );
+			printf("server sends twitterTrend response: %s\n", build_string_request_message( response ) );
 
 			//message ENDOFRES
 			clean_message( response );

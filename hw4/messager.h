@@ -35,6 +35,8 @@ message_t construct_message( int msg_id, char *msg_payload );
 
 char * build_string_message( message_t msg );
 
+char * build_string_request_message( message_t msg );
+
 //preps for a recv
 void clean_message( message_t msg);
 
