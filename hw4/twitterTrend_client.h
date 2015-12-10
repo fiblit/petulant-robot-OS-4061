@@ -27,6 +27,6 @@
 
 char **getCityNames( char *filepath );
 
-void writeReportFile( char *filepath, char *cityName, message_t response_msg );
+void writeReportFile( FILE *filepath, char *cityName, message_t response_msg );
 
 #endif

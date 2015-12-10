@@ -70,7 +70,7 @@ int sendMessage( int sock_fd, message_t send ) {
 	char *payload_string = ( char * ) malloc ( sizeof ( char ) * MAXLINESIZE + 1 );
 	sprintf( id_string, "%d", send->id ); //convert id to string for transmission
 	sprintf( length_string, "%d", send->length ); //convert length to string for transmission
-	printf("send->payload = %s\n", send->payload );
+	printf("send->payload = \"%s\"\n", send->payload );
 	if ( send->payload != NULL ) {
 		strcpy( payload_string, send->payload );
 	}
@@ -86,7 +86,7 @@ int sendMessage( int sock_fd, message_t send ) {
 		return -1;
 	}
 
-	bytesSent_payload = write( sock_fd, payload_string, sizeof( payload_string ) );
+	bytesSent_payload = write( sock_fd, payload_string, send->length );
 	if ( bytesSent_payload < 0 ) {
 		perror( "Error sending payload message" );
 		return -1;
@@ -115,18 +115,18 @@ int recvMessage( int sock_fd, message_t recv ) {
 		return -1;
 	}
 	recv->length = atoi( length_string );
-	fprintf(stderr, "\nDEBUG 2: %d\n", recv->length);
+	fprintf(stderr, "\nDEBUG 2: %d, %d\n", recv->length, MAXLINESIZE);
 
-	bytesRecv_payload = read( sock_fd, payload_string, sizeof( payload_string ) );
+	bytesRecv_payload = read( sock_fd, payload_string, recv->length );
 	if ( bytesRecv_payload < 0 ) {
 		perror( "Error receiving payload message" );
 		return -1;
 	}
 	recv->payload = ( char * ) malloc ( sizeof ( char ) * recv->length );
-	printf("payload_string: %s\n", payload_string);
+	printf("payload_string: \"%s\"\n", payload_string);
 	strcpy( recv->payload, payload_string );
 	//recv->payload[recv->length] = '\0';
-	fprintf(stderr, "\nDEBUG 3: %s\n", recv->payload);
+	fprintf(stderr, "\nDEBUG 3: \"%s\"\n", recv->payload);
 
 	free(id_string);
 	free(length_string);

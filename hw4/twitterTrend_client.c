@@ -92,6 +92,12 @@ int main( int argc, char *argv[] ) {
 		printf("%s\n",fileName);
         cityNames = getCityNames( fileName );
 
+    	FILE *reportFile;
+    	char *reportFileName = ( char * ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE );
+    	strcpy( reportFileName, fileName ); 
+		strcat( reportFileName, ".result" ); //create name of result file
+    	reportFile = fopen( reportFileName, "w+" ); //w+ is truncate read&write
+
         for (n = 0; cityNames[ n ] != NULL; n++ ) {
             memset( cityName, 0, ( sizeof ( char ) * MAXCITYSIZE ) );
             cityName = cityNames[ n ];
@@ -108,9 +114,12 @@ int main( int argc, char *argv[] ) {
             }
             //printf("DEBUGCLIENT1: response_msg->payload : %s\n", response_msg->payload );
 
-            writeReportFile( fileName, cityName, response_msg );
+            writeReportFile( reportFile, cityName, response_msg );
             //free( cityName );
         }
+
+		fclose( reportFile );
+		free( reportFileName );
     }
 
     endRequest( sockfd );
@@ -146,14 +155,9 @@ char **getCityNames( char *filepath ) {
     return cityNames;
 }
 
-void writeReportFile( char *filepath, char *cityName, message_t response_msg ) {
-    FILE *reportFile;
+void writeReportFile( FILE* reportFile, char *cityName, message_t response_msg ) {
     int lineAfterCityNameLength;
     int cityLength;
-    char *reportFileName = ( char * ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE );
-    strcpy( reportFileName, filepath ); //copy filepath into filePathCopy so filepath isn't altered incase we need it later
-    strcat( reportFileName, ".result" ); //create name of result file
-    reportFile = fopen( reportFileName, "a+" ); //a+ mode will create the file and append further entries onto it
 
     lineAfterCityNameLength = response_msg->length; //length of payload
     cityLength = strlen( cityName );
@@ -167,5 +171,4 @@ void writeReportFile( char *filepath, char *cityName, message_t response_msg ) {
     fputc( ' ', reportFile );
     fwrite( response_msg->payload, sizeof ( char ), lineAfterCityNameLength, reportFile );
     fputc( '\n', reportFile );
-    fclose( reportFile );
 }
