@@ -168,6 +168,6 @@ void writeReportFile( FILE* reportFile, char *cityName, message_t response_msg )
     fputc( ' ', reportFile );
     fputc( ':', reportFile );
     fputc( ' ', reportFile );
-    fwrite( response_msg->payload, sizeof ( char ), lineAfterCityNameLength, reportFile );
+    fwrite( response_msg->payload, sizeof ( char ), lineAfterCityNameLength-1, reportFile );
     fputc( '\n', reportFile );
 }
