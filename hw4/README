@@ -12,6 +12,17 @@ EC was completed.
 	Stress testing in the range of 1k 5k or 10k usually ended up crashing the server depending on
     the client file sizes. It also takes a long time to run.
 
+	Approximate formula for "client" limit: (This is really rough)
+		cities_in_client * concurrent_client_daemons < ~4000
+
+	Final Note:
+		You know what. Just don't run more than 100 clients concurrently. The server's queue loves
+		to crash from memory overflow/corruption/bad free.
+
+	Best Stress Tests:
+		50 concurrent clients with 78(?) cities each
+        1000 concurrent clients with 1 city each
+
 options:
  if there is a "-v" at the end of the command for twitterTrend_client or twitterTrend_server, they will print the optional debug stuff
  e.g.
