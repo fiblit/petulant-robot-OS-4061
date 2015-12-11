@@ -86,7 +86,7 @@ int main( int argc, char *argv[] ) {
         errorFunction( "Client failed to connect" );
     }
 
-    if (verboseDebug)
+    if (!verboseDebug)
         printf( "client connects\n" ); //displayed when connection successful
 
     if ( clientHandShake( sockfd, verboseDebug ) == -1 ) {

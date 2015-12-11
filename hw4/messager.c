@@ -200,8 +200,8 @@ int clientHandShake( int sock_fd, bool verboseDebug ) {
 			close( sock_fd );
 			return -1;
 		}
-		if (verboseDebug)
-			printf( "client sends handshake response: %s\n", build_string_message( msg ) );
+		if (!verboseDebug)
+			printf( "client sends handshake response:%s\n", build_string_message( msg ) );
 	}
 	return 0;
 }
@@ -209,8 +209,8 @@ int clientHandShake( int sock_fd, bool verboseDebug ) {
 int serverHandShake( int sock_fd, char *addr, bool verboseDebug ) {
 	message_t msg = construct_message( HANDSHAKE, NULL );
 	sendMessage( sock_fd, msg );
-	if (verboseDebug)
-		printf( "server sends handshaking: %s to client %s\n", build_string_message( msg ), addr );
+	if (!verboseDebug)
+		printf( "server sends handshaking:%s\n", build_string_message( msg ) );//, addr );
 	recvMessage( sock_fd, msg );
 	if (msg->id == ERRMSG) {
 		printf( "server detected that client %s experienced an error during handshake, closing connection\n", addr );
@@ -223,8 +223,8 @@ int serverHandShake( int sock_fd, char *addr, bool verboseDebug ) {
 		return -1;
 	}
 	else { //success
-		if (verboseDebug)
-			printf( "server received handshake response: %s from client %s\n", build_string_message( msg ), addr );
+		//if (!verboseDebug)
+		//	printf( "server received handshake response: %s from client %s\n", build_string_message( msg ), addr );
 	}
 	return 0;
 }
@@ -233,8 +233,8 @@ void twitterTrendRequest( int sock_fd, char * cityName, bool verboseDebug ) {
 	//message_t msg = ( message_t ) malloc ( sizeof ( message ) );
 	message_t msg = construct_message( REQUEST, cityName );
 	sendMessage( sock_fd, msg );
-	if (verboseDebug)
-		printf( "client sends twitterTrend request: %s\n", build_string_request_message( msg ) );
+	if (!verboseDebug)
+		printf( "client sends twitterTrend request:%s\n", build_string_request_message( msg ) );
 }
 
 message_t waitForResponse( int sock_fd ) {
@@ -290,6 +290,6 @@ void endRequest( int sock_fd, bool verboseDebug ) {
 		close( sock_fd );
 		exit( EXIT_FAILURE ); //will already print error message from sendMessage
 	}
-	if (verboseDebug)
-		printf( "client sends end of request: %s\n", build_string_message( msg ) );
+	if (!verboseDebug)
+		printf( "client sends end of request:%s\n", build_string_message( msg ) );
 }

@@ -78,7 +78,7 @@ int main( int argc, char *argv[] ) {
 		errorFunction( "Failed to listen on socket" );
 
 	if (!verboseDebug)
-		printf( "server listens on port %d\n", publicServerPort);
+		printf( "server listens\n" );//, publicServerPort);
 
 	/* init data structures */
 	readTwitterDB();
@@ -323,7 +323,7 @@ void *processer( void *args ) {
 				//goes on to close client
 			}
 			if (!verboseDebug)
-				printf("server sends twitterTrend response: %s\n", build_string_request_message( response ) );
+				printf("server sends twitterTrend response:%s\n", build_string_request_message( response ) );
 
 			//message ENDOFRES
 			clean_message( response );
@@ -338,7 +338,7 @@ void *processer( void *args ) {
 				//goes on to close client
 			}
 			if (!verboseDebug)
-				printf("server sends end of response: %s\n", build_string_message( response ) );
+				printf("server sends end of response:%s\n", build_string_message( response ) );
 		}
 
 		/* Step #11: close the connection with client */
