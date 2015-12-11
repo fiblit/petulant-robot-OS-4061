@@ -58,10 +58,13 @@ void clean_message( message_t msg ) {
 
 void destruct_message( message_t msg ) {
 	if ( msg->payload != NULL ) {
-		free( msg->payload ); //IS SEGFAULTING ATM
+		//free( msg->payload ); //IS SEGFAULTING ATM//TODO: <- probably because not all payloads are dynamiclly allocated. We'd have to add a function called "setPayload" to guarentee this.
 	}
 	free( msg );
 }
+
+//global variable to maintain robustness if other end dies
+bool messager_pipeDeath;
 
 int sendMessage( int sock_fd, message_t send ) {
 	int bytesSent_id, bytesSent_length, bytesSent_payload;
@@ -70,30 +73,44 @@ int sendMessage( int sock_fd, message_t send ) {
 	char *payload_string = ( char * ) malloc ( sizeof ( char ) * MAXLINESIZE + 1 );
 	sprintf( id_string, "%d", send->id ); //convert id to string for transmission
 	sprintf( length_string, "%d", send->length ); //convert length to string for transmission
-	/*
-	printf("send->payload = \"%s\"\n", send->payload );
-	*/
+
+	/* setup signal handler, in case other end died mid connection */
+	messager_pipeDeath = false;
+	signal(SIGPIPE, handle_pipeDeath);
+
+	/* send information */
 	if ( send->payload != NULL ) {
 		strcpy( payload_string, send->payload );
 	}
 	bytesSent_id = write( sock_fd, id_string, sizeof( id_string ) );
-	if ( bytesSent_id < 0 ) {
+	if ( bytesSent_id < 0 || messager_pipeDeath) {
 		perror( "Error sending id message" );
 		return -1;
 	}
 
 	bytesSent_length = write( sock_fd, length_string, sizeof( length_string ) );
-	if ( bytesSent_length < 0 ) {
+	if ( bytesSent_length < 0 || messager_pipeDeath) {
 		perror( "Error sending length message" );
 		return -1;
 	}
 
 	bytesSent_payload = write( sock_fd, payload_string, send->length);
-	if ( bytesSent_payload < 0 ) {
+	if ( bytesSent_payload < 0 || messager_pipeDeath) {
 		perror( "Error sending payload message" );
 		return -1;
 	}
+
+	/* end signal handler */
+	signal(SIGPIPE, SIG_DFL);
+
 	return bytesSent_id + bytesSent_length + bytesSent_payload;
+}
+
+/* fixes the problem of the server crashing when the client died mid-communication  */
+void handle_pipeDeath( int signo ) {
+	if (signo == SIGPIPE) {
+		messager_pipeDeath = true;
+	}	
 }
 
 int recvMessage( int sock_fd, message_t recv ) {
@@ -101,7 +118,8 @@ int recvMessage( int sock_fd, message_t recv ) {
 	char *id_string = ( char * ) malloc ( sizeof ( char ) * 4 ); //3 chars + '\0'
 	char *length_string = ( char * ) malloc ( sizeof ( char ) * 4 ); //3 chars + '\0'
 	char *payload_string = ( char * ) malloc ( sizeof ( char ) * MAXLINESIZE );
-	//clean_message( recv ); //IS SEGFAULTING ATM
+	//clean_message( recv ); //IS SEGFAULTING ATM //TODO: probably because not all payloads are dynamically allocated. 
+	                                              //We'd need a function "setPayload" to guarentee that. (You can't free something on the stack)
 
 	bytesRecv_id = read( sock_fd, id_string, sizeof( id_string ) );
 	if ( bytesRecv_id < 0 ) {

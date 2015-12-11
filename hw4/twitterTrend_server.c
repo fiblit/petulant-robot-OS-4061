@@ -232,7 +232,7 @@ void *processer( void *args ) {
 
 			message_t response = construct_message_blank();
 			if (request->id == ERRMSG) {
-				printf( "server detected a client error: %s, from client %s\n\tclosing connection\n", request->payload, clientAddrPort);
+				printf( "server detected a client error: %s, from client %s\tclosing connection\n", request->payload, clientAddrPort);
 				destruct_message(request);
 				destruct_message(response);
 				break;
@@ -297,7 +297,7 @@ void *processer( void *args ) {
 			/* Step #9: send back 3 keywords followed by end of response message */
 			//message response
 			if(sendMessage( processerClient->socket, response ) == -1) {
-				printf( "server malfunction during response send to client %s\b", clientAddrPort );
+				printf( "server malfunction during response send to client %s\n", clientAddrPort );
 				break;
 				//goes on to close client
 			}

@@ -10,6 +10,8 @@
 #include <string.h>
 #include <stdlib.h>
 #include <unistd.h>
+#include <signal.h>
+#include <stdbool.h>
 #include "errorFunction.h"
 
 #define MAXLINESIZE 110
@@ -43,6 +45,7 @@ void clean_message( message_t msg);
 void destruct_message( message_t msg );
 
 int sendMessage( int sock_fd, message_t send );
+void handle_pipeDeath( int signo );
 
 int recvMessage( int sock_fd, message_t recv );
 
