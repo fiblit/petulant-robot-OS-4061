@@ -5,26 +5,19 @@
 EC was completed.
 
 "Bug" note:
-	Don't run more than about 1000-5000 clients
-	At that point the memory leaks catch up to the server and malloc gets a failed assertion...
-		so we think, at least.
-	For legitimate testing we usually did <100 clients
-	Stress testing in the range of 1k 5k or 10k usually ended up crashing the server depending on
-    the client file sizes. It also takes a long time to run.
-
-	Approximate formula for "client" limit: (This is really rough)
-		cities_in_client * concurrent_client_daemons < ~4000
-
-	Final Note:
-		You know what. Just don't run more than 100 clients concurrently. The server's queue loves
-		to crash from memory overflow/corruption/bad free.
+	The server crashes due to memory leaks if it is over-stressed.
+		The client will exit robustly
+	A lot of the memory leaks were... ugly... we'd get some interesting errors where malloc would
+    fail an assertion when we tried to fix it. Thankfully, the server crashed usually outside of the bounds of the assumptions
 
 	Best Stress Tests:
-		50 concurrent clients with 78(?) cities each
-        1000 concurrent clients with 1 city each
+		100 concurrent clients with 78 cities each
+        1000(0?) concurrent clients with 1 city each (I tried 10k again, but it acted kinda weird, I think it only did 5k on that one)
+		~5000 consecutive clients with 1 city each (I was trying to do 10k and malloc crashed)
 
 options:
- if there is a "-v" at the end of the command for twitterTrend_client or twitterTrend_server, they will print the optional debug stuff
+ if there is a "-v" at the end of the command for twitterTrend_client or twitterTrend_server, 
+	they will print the optional debug stuff
  e.g.
 
  $ ./twitterTrend_server 7575 5 -v
