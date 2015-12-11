@@ -52,7 +52,7 @@ char * build_string_request_message( message_t msg ) {
 
 void clean_message( message_t msg ) {
 	if ( msg->payload != NULL ) {
-		free( msg->payload );
+		//free( msg->payload ); //TODO: *sigh*
 	}
 }
 

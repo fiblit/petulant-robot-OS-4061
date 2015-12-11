@@ -4,6 +4,14 @@
 
 EC was completed.
 
+"Bug" note:
+	Don't run more than about 1000-5000 clients
+	At that point the memory leaks catch up to the server and malloc gets a failed assertion...
+		so we think, at least.
+	For legitimate testing we usually did <100 clients
+	Stress testing in the range of 1k 5k or 10k usually ended up crashing the server depending on
+    the client file sizes. It also takes a long time to run.
+
 options:
  if there is a "-v" at the end of the command for twitterTrend_client or twitterTrend_server, they will print the optional debug stuff
  e.g.
