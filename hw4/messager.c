@@ -82,19 +82,19 @@ int sendMessage( int sock_fd, message_t send ) {
 	if ( send->payload != NULL ) {
 		strcpy( payload_string, send->payload );
 	}
-	bytesSent_id = write( sock_fd, id_string, sizeof( id_string ) );
+	bytesSent_id = r_write( sock_fd, id_string, sizeof( id_string ) );
 	if ( bytesSent_id < 0 || messager_pipeDeath) {
 		perror( "Error sending id message" );
 		return -1;
 	}
 
-	bytesSent_length = write( sock_fd, length_string, sizeof( length_string ) );
+	bytesSent_length = r_write( sock_fd, length_string, sizeof( length_string ) );
 	if ( bytesSent_length < 0 || messager_pipeDeath) {
 		perror( "Error sending length message" );
 		return -1;
 	}
 
-	bytesSent_payload = write( sock_fd, payload_string, send->length);
+	bytesSent_payload = r_write( sock_fd, payload_string, send->length);
 	if ( bytesSent_payload < 0 || messager_pipeDeath) {
 		perror( "Error sending payload message" );
 		return -1;
@@ -121,46 +121,61 @@ int recvMessage( int sock_fd, message_t recv ) {
 	//clean_message( recv ); //IS SEGFAULTING ATM //TODO: probably because not all payloads are dynamically allocated. 
 	                                              //We'd need a function "setPayload" to guarentee that. (You can't free something on the stack)
 
-	bytesRecv_id = read( sock_fd, id_string, sizeof( id_string ) );
+	bytesRecv_id = r_read( sock_fd, id_string, sizeof( id_string ) );
 	if ( bytesRecv_id < 0 ) {
 		perror( "Error receiving id message" );
 		return -1;
 	}
 	recv->id = atoi( id_string );
-	/*
-	fprintf(stderr, "\nDEBUG 1: %d\n", recv->id);
-	*/
 
-	bytesRecv_length = read( sock_fd, length_string, sizeof( length_string ) );
+	bytesRecv_length = r_read( sock_fd, length_string, sizeof( length_string ) );
 	if ( bytesRecv_length < 0 ) {
 		perror( "Error receiving length message" );
 		return -1;
 	}
 	recv->length = atoi( length_string );
-	/*
-	fprintf(stderr, "\nDEBUG 2: %d, %d\n", recv->length, MAXLINESIZE);
-	*/
 
-	bytesRecv_payload = read( sock_fd, payload_string, recv->length);
+	bytesRecv_payload = r_read( sock_fd, payload_string, recv->length);
 	if ( bytesRecv_payload < 0 ) {
 		perror( "Error receiving payload message" );
 		return -1;
 	}
 	recv->payload = ( char * ) malloc ( sizeof ( char ) * recv->length );
-	/*
-	printf("payload_string: \"%s\"\n", payload_string);
-	*/
 	strcpy( recv->payload, payload_string);
 	//recv->payload[recv->length] = '\0';
-	/*
-	fprintf(stderr, "\nDEBUG 3: \"%s\"\n", recv->payload);
-	*/
 
 	free(id_string);
 	free(length_string);
 	free(payload_string);
 
 	return bytesRecv_id + bytesRecv_length + bytesRecv_payload;
+}
+
+/* taken from book, for convenience, Appendix B. pg 821 */
+ssize_t r_read( int fd, void *buf, size_t size) {
+	ssize_t retval;
+	while (retval = read( fd, buf, size ), retval == -1 && errno == EINTR);
+	return retval;
+}
+
+/* taken from book, Appendix B. pg 822 */
+ssize_t r_write( int fd, void *buf, size_t size) {
+	char *bufp;
+	size_t bytestowrite;
+	ssize_t byteswritten;
+	size_t totalbytes;
+
+	for (bufp = buf, bytestowrite = size, totalbytes = 0;
+			bytestowrite > 0;
+			(bufp += byteswritten), (bytestowrite -= byteswritten)) {
+		byteswritten = write(fd, bufp, bytestowrite);
+		if ((byteswritten) == -1 && (errno != EINTR))
+			return -1;
+		if (byteswritten == -1)
+			byteswritten = 0;
+		totalbytes += byteswritten;
+	}
+	return totalbytes;
 }
 
 int clientHandShake( int sock_fd ) {

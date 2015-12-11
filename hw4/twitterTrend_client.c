@@ -14,7 +14,7 @@ int main( int argc, char *argv[] ) {
     struct addrinfo hints;
     struct addrinfo *serv_info, *p;
     char *portno = ( char * ) malloc ( sizeof ( char ) * MAXPORTNOSIZE );
-    char **fileArray = ( char ** ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE * (argc - 3) ); //argc-3 is amount of files given
+    char **fileArray = ( char ** ) malloc ( sizeof ( char * ) * MAXFILEPATHSIZE * (argc - 3) ); //argc-3 is amount of files given
     char *host_name = ( char * ) malloc ( sizeof ( char ) * HOST_NAME_MAX );
 
     if ( argc < 4 ) {
@@ -31,7 +31,7 @@ int main( int argc, char *argv[] ) {
     host_name = argv[ 1 ];
 
     if ( strlen( host_name ) > HOST_NAME_MAX ) {
-        fprintf( stderr, "Error, host name is too long, must be 255 or less characters\n" );
+        fprintf( stderr, "Error: host name is too long, must be 255 or less characters\n" );
         return 1;
     }
 
@@ -63,10 +63,11 @@ int main( int argc, char *argv[] ) {
 
         if ( connect( sockfd, p->ai_addr, p->ai_addrlen ) == -1 ) {
             close ( sockfd );
-            perror( "Client, error connecting, trying again" );
+            perror( "Client failed to connect, trying again" );
             continue;
         }
 
+		fprintf(stderr, "Error: Client failed to connect, exiting" );
         break;
     }
 
@@ -88,6 +89,10 @@ int main( int argc, char *argv[] ) {
     for( int k = 0; k < ( argc - 3 ); k++ ) {
         fileName = fileArray[ k ];
         cityNames = getCityNames( fileName );
+		if (cityNames == NULL) {
+			printf("client skipping file \"%s\" due to error\n", fileName);
+			continue;
+		}
 
     	FILE *reportFile;
     	char *reportFileName = ( char * ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE );
@@ -125,15 +130,18 @@ char **getCityNames( char *filepath ) {
     int lineCounter = 0;
     int cityLength;
     if ( filepath == NULL ) { //check to make sure something is in filepath
-        errorFunction( "Error : filepath doesn't exist" );
+        perror( "Error : filepath doesn't exist, avoided seg fault\n" );
+		return NULL;
     }
     else {
         if ( access ( filepath, F_OK ) != -1 ) {  //check if file exists, if it does open it
             cityFile = fopen ( filepath, "r" );
         } else { //it does not exist
-            errorFunction ( "Error, attempting to open nonexistent file" );
+             printf( "Error: tried to open file \"%s\", which does not exist\n", filepath );
+			 return NULL;
         }
     }
+
     char **cityNames = ( char ** ) malloc ( sizeof ( char * ) * MAXCITYSIZE * MAXCITIES );
     char *buffer = ( char * ) malloc ( sizeof ( char ) * MAXCITYSIZE );
     while ( fgets( buffer, MAXCITYSIZE, cityFile ) != NULL ) {

@@ -48,7 +48,7 @@ int main( int argc, char *argv[] ) {
 		errorFunction( "Failed to bind to given port" );
 	if ( listen( serverSocket, 50 )  == -1)//TODO: change backlog amount to whatever it needs to be. (100?)
 		errorFunction( "Failed to listen on socket" );
-	printf( "Listening on port %d\n", publicServerPort);
+	printf( "server listens on port %d\n", publicServerPort);
 
 	/* init data structures */
 	readTwitterDB();
@@ -143,16 +143,7 @@ void openInFile( char *inFileName ) {
 
 void *processer( void *args ) {
 	int id = *((int *) args);
-	//int cityLength;
-	//int lastCharOfCity;
 	int semValue;
-	//FILE *cityFile;
-/*
-	char *lineAfterCityName = ( char * ) malloc ( sizeof ( char ) * 85 ); //will be contents of cityLine after the cityName
- 	if ( lineAfterCityName == NULL ) { //malloc error checking
-		errorFunction ( "Call to malloc failed in processer" );
-	}
-*/
 
 	char *cityLine = ( char * ) malloc ( sizeof ( char ) * 100 ); //every line in TwitterDB is less than 100 characters
 	if ( cityLine == NULL ) { //malloc error checking
@@ -168,7 +159,7 @@ void *processer( void *args ) {
 
 	while ( 1 ) { //test if the queue has anything in it
 
-		//keep dequeueing until we break
+		//keep dequeueing until we break //which is only whena fatal error occurs
 		if ( sem_wait ( &full_slots ) != 0 ) {
 			perror( "Error occured while processer was waiting" );
 		}
@@ -232,7 +223,7 @@ void *processer( void *args ) {
 
 			message_t response = construct_message_blank();
 			if (request->id == ERRMSG) {
-				printf( "server detected a client error: %s, from client %s\tclosing connection\n", request->payload, clientAddrPort);
+				printf( "server detected a client error: %s, from client %s. Closing connection\n", request->payload, clientAddrPort);
 				destruct_message(request);
 				destruct_message(response);
 				break;
@@ -245,7 +236,7 @@ void *processer( void *args ) {
 				//goes on to close client
 			}
 			else if (request->id != REQUEST) {
-				printf( "server detected client malfunction from client %s\n\tclosing connection\n", clientAddrPort);
+				printf( "server detected client malfunction from client %s, closing connection\n", clientAddrPort);
 				response->payload = "Invalid message type: please request";
 				response->length = strlen(response->payload) + 1;
 				if(sendMessage( processerClient->socket, response ) == -1) {

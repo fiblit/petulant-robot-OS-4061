@@ -12,6 +12,9 @@
 #include <unistd.h>
 #include <signal.h>
 #include <stdbool.h>
+#include <errno.h>
+#include <fcntl.h>
+#include <sys/types.h>
 #include "errorFunction.h"
 
 #define MAXLINESIZE 110
@@ -48,6 +51,10 @@ int sendMessage( int sock_fd, message_t send );
 void handle_pipeDeath( int signo );
 
 int recvMessage( int sock_fd, message_t recv );
+
+//from restart library
+ssize_t r_read( int fd, void *buf, size_t size );
+ssize_t r_write( int fd, void *buf, size_t size );
 
 int clientHandShake( int sock_fd );
 

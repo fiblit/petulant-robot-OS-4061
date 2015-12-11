@@ -31,3 +31,7 @@ errorFunction.o: errorFunction.c errorFunction.h
 
 clean:
 	rm -f *.o twitterTrend_server twitterTrend_client
+
+cleanr:
+	rm -f *.result
+
