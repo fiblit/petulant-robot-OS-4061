@@ -14,7 +14,7 @@ int main( int argc, char *argv[] ) {
     struct addrinfo hints;
     struct addrinfo *serv_info, *p;
     char *portno = ( char * ) malloc ( sizeof ( char ) * MAXPORTNOSIZE );
-	char **fileArray;
+    char **fileArray;
     char *host_name = ( char * ) malloc ( sizeof ( char ) * HOST_NAME_MAX );
 
     if ( argc < 4 ) {
@@ -35,18 +35,18 @@ int main( int argc, char *argv[] ) {
         return 1;
     }
 
-	int fileArrayEnd;
-	if (strlen( argv[ argc - 1  ] ) == 2 &&
-		strcmp( argv[ argc - 1  ], "-v") == 0) {// -v used
-		verboseDebug = true;
-		fileArrayEnd = argc - 4; //there are this many files
-	}
-	else {
-		verboseDebug = false;
-		fileArrayEnd = argc - 3;
-	}
-	
-	fileArray = (char **) malloc( sizeof( char * ) * MAXFILEPATHSIZE * fileArrayEnd );
+    int fileArrayEnd;
+    if (strlen( argv[ argc - 1  ] ) == 2 &&
+        strcmp( argv[ argc - 1  ], "-v") == 0) {// -v used
+        verboseDebug = true;
+        fileArrayEnd = argc - 4; //there are this many files
+    }
+    else {
+        verboseDebug = false;
+        fileArrayEnd = argc - 3;
+    }
+    
+    fileArray = (char **) malloc( sizeof( char * ) * MAXFILEPATHSIZE * fileArrayEnd );
     for (i = 0; i < fileArrayEnd; i++ ) {
         fileArray[ i ] = ( char * ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE );
         fileArray[ i ] = argv[ 3+i ]; //3 is the start of file arguments
@@ -86,15 +86,15 @@ int main( int argc, char *argv[] ) {
         errorFunction( "Client failed to connect" );
     }
 
-	if (verboseDebug)
-    	printf( "client connects\n" ); //displayed when connection successful
+    if (verboseDebug)
+        printf( "client connects\n" ); //displayed when connection successful
 
     if ( clientHandShake( sockfd, verboseDebug ) == -1 ) {
         printf( "Error: an error message was sent or recieved during handshake, exiting\n" );
         exit( EXIT_FAILURE );
     }
 
-	/* do communication */
+    /* do communication */
     char *fileName;
     char **cityNames = ( char ** ) malloc ( sizeof ( char * ) * MAXCITYSIZE * MAXCITIES );
     char *cityName = ( char * ) malloc ( sizeof ( char ) * MAXCITYSIZE );
@@ -102,18 +102,18 @@ int main( int argc, char *argv[] ) {
     for( int k = 0; k < fileArrayEnd; k++ ) {
         fileName = fileArray[ k ];
         cityNames = getCityNames( fileName );
-		if (cityNames == NULL) {
-			printf("client skipping file \"%s\" due to error\n", fileName);
-			continue;
-		}
+        if (cityNames == NULL) {
+            printf("client skipping file \"%s\" due to error\n", fileName);
+            continue;
+        }
 
-    	FILE *reportFile;
-    	char *reportFileName = ( char * ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE );
-    	strcpy( reportFileName, fileName );
-		strcat( reportFileName, ".result" ); //create name of result file
-    	reportFile = fopen( reportFileName, "w+" ); //w+ is truncate read&write
+        FILE *reportFile;
+        char *reportFileName = ( char * ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE );
+        strcpy( reportFileName, fileName );
+        strcat( reportFileName, ".result" ); //create name of result file
+        reportFile = fopen( reportFileName, "w+" ); //w+ is truncate read&write
 
-		/* do the kth files communication */
+        /* do the kth files communication */
         for (n = 0; cityNames[ n ] != NULL; n++ ) {
             memset( cityName, 0, ( sizeof ( char ) * MAXCITYSIZE ) );
             cityName = cityNames[ n ];
@@ -132,9 +132,9 @@ int main( int argc, char *argv[] ) {
             writeReportFile( reportFile, cityName, response_msg );
         }
 
-		//some cleanup....
-		fclose( reportFile );
-		free( reportFileName );
+        //some cleanup....
+        fclose( reportFile );
+        free( reportFileName );
     }
 
     endRequest( sockfd, verboseDebug );
@@ -146,14 +146,14 @@ char **getCityNames( char *filepath ) {
     int cityLength;
     if ( filepath == NULL ) { //check to make sure something is in filepath
         perror( "Error : filepath doesn't exist, avoided seg fault\n" );
-		return NULL;
+        return NULL;
     }
     else {
         if ( access ( filepath, F_OK ) != -1 ) {  //check if file exists, if it does open it
             cityFile = fopen ( filepath, "r" );
         } else { //it does not exist
              printf( "Error: tried to open file \"%s\", which does not exist\n", filepath );
-			 return NULL;
+             return NULL;
         }
     }
 
