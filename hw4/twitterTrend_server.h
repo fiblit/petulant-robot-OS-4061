@@ -25,6 +25,7 @@
 
 #define TWITTERDB_FILENAME "TwitterDB.txt"
 #define MAXCITYNAMELENGTH 15
+#define MAXCLIENTBACKLOG 100
 
 /* global variables */
 sem_t full_slots;

@@ -74,7 +74,7 @@ int main( int argc, char *argv[] ) {
 	serverAddr.sin_addr.s_addr = htonl( INADDR_ANY );
 	if ( bind( serverSocket, (struct sockaddr *)&serverAddr, sizeof(serverAddr) ) == -1)
 		errorFunction( "Failed to bind to given port" );
-	if ( listen( serverSocket, 50 )  == -1)//TODO: change backlog amount to whatever it needs to be. (100?)
+	if ( listen( serverSocket, MAXCLIENTBACKLOG )  == -1)
 		errorFunction( "Failed to listen on socket" );
 
 	if (verboseDebug)
