@@ -71,7 +71,12 @@ char *TwitterDBMem_getCityKwd(TwitterDBMem_t tdbm, const char *city) {
 	//Linear search. TODO: change it to a binary search
 	int cityLen = strlen( city );
 	for (int i = 0; i < tdbm->numLines; i++) {
-		if ( strncmp( tdbm->lines[ i ], city, cityLen ) == 0 ) {
+		char *cityTemp = (char *) malloc( sizeof( char ) * cityLen + 2);
+		strcpy(cityTemp, city);
+		cityTemp[cityLen] = ',';
+		cityTemp[cityLen+1] = '\0';
+		if ( strncmp( tdbm->lines[ i ], cityTemp, cityLen+1 ) == 0 ) {
+			free( cityTemp );
 			int cLineLen = strlen( tdbm->lines[ i ] ) + 1;
 			char *cline = (char *) malloc( sizeof( char ) * cLineLen );
 			if ( cline == NULL ) { //malloc error checking
