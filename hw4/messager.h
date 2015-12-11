@@ -56,16 +56,16 @@ int recvMessage( int sock_fd, message_t recv );
 ssize_t r_read( int fd, void *buf, size_t size );
 ssize_t r_write( int fd, void *buf, size_t size );
 
-int clientHandShake( int sock_fd );
+int clientHandShake( int sock_fd, bool verboseDebug );
 
-int serverHandShake( int sock_fd, char * addr );
+int serverHandShake( int sock_fd, char * addr, bool verboseDebug );
 
-void twitterTrendRequest( int sock_fd, char * cityName );
+void twitterTrendRequest( int sock_fd, char * cityName, bool verboseDebug );
 
 message_t waitForResponse( int sock_fd );
 
 int acknowledgeEndOfResponse( int sock_fd );
 
-void endRequest( int sock_fd );
+void endRequest( int sock_fd, bool verboseDebug );
 
 #endif

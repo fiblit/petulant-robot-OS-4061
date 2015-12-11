@@ -1,5 +1,16 @@
 /* CSci4061 Assignment 4
 * name: Dalton Hildreth, Timothy Kohn
 * id: hildr039, kohnx074 */
-EC was done.
+
+EC was completed.
+
+options:
+ if there is a "-v" at the end of the command for twitterTrend_client or twitterTrend_server, they will print the optional debug stuff
+ e.g.
+
+ $ ./twitterTrend_server 7575 5 -v
+ server listens on port 7575
+ ^C 
+ $ echo ... and so on
+ ... and so on
 

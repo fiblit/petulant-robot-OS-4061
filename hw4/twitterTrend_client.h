@@ -23,10 +23,13 @@
 #include <netinet/in.h>
 #include <netdb.h>
 #include <arpa/inet.h>
+#include <stdbool.h>
 
 
 char **getCityNames( char *filepath );
 
 void writeReportFile( FILE *filepath, char *cityName, message_t response_msg );
+
+bool verboseDebug;
 
 #endif

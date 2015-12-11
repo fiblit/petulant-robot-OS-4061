@@ -178,7 +178,7 @@ ssize_t r_write( int fd, void *buf, size_t size) {
 	return totalbytes;
 }
 
-int clientHandShake( int sock_fd ) {
+int clientHandShake( int sock_fd, bool verboseDebug ) {
 	message_t msg = construct_message_blank();
 	recvMessage( sock_fd, msg );
 	if (msg->id == ERRMSG) {
@@ -200,15 +200,17 @@ int clientHandShake( int sock_fd ) {
 			close( sock_fd );
 			return -1;
 		}
-		printf( "client sends handshake response: %s\n", build_string_message( msg ) );
+		if (verboseDebug)
+			printf( "client sends handshake response: %s\n", build_string_message( msg ) );
 	}
 	return 0;
 }
 
-int serverHandShake( int sock_fd, char *addr ) {
+int serverHandShake( int sock_fd, char *addr, bool verboseDebug ) {
 	message_t msg = construct_message( HANDSHAKE, NULL );
 	sendMessage( sock_fd, msg );
-	printf( "server sends handshaking: %s to client %s\n", build_string_message( msg ), addr );
+	if (verboseDebug)
+		printf( "server sends handshaking: %s to client %s\n", build_string_message( msg ), addr );
 	recvMessage( sock_fd, msg );
 	if (msg->id == ERRMSG) {
 		printf( "server detected that client %s experienced an error during handshake, closing connection\n", addr );
@@ -221,16 +223,18 @@ int serverHandShake( int sock_fd, char *addr ) {
 		return -1;
 	}
 	else { //success
-		printf( "server received handshake response: %s from client %s\n", build_string_message( msg ), addr );
+		if (verboseDebug)
+			printf( "server received handshake response: %s from client %s\n", build_string_message( msg ), addr );
 	}
 	return 0;
 }
 
-void twitterTrendRequest( int sock_fd, char * cityName ) {
+void twitterTrendRequest( int sock_fd, char * cityName, bool verboseDebug ) {
 	//message_t msg = ( message_t ) malloc ( sizeof ( message ) );
 	message_t msg = construct_message( REQUEST, cityName );
 	sendMessage( sock_fd, msg );
-	printf( "client sends twitterTrend request: %s\n", build_string_request_message( msg ) );
+	if (verboseDebug)
+		printf( "client sends twitterTrend request: %s\n", build_string_request_message( msg ) );
 }
 
 message_t waitForResponse( int sock_fd ) {
@@ -280,11 +284,12 @@ int acknowledgeEndOfResponse( int sock_fd ) {
 	return 0;
 }
 
-void endRequest( int sock_fd ) {
+void endRequest( int sock_fd, bool verboseDebug ) {
 	message_t msg = construct_message( ENDREQ, NULL ); //build msg with empty payload
 	if ( sendMessage( sock_fd, msg ) == -1 ) {  //if write for endRequest message to server fails
 		close( sock_fd );
 		exit( EXIT_FAILURE ); //will already print error message from sendMessage
 	}
-	printf( "client sends end of request: %s\n", build_string_message( msg ) );
+	if (verboseDebug)
+		printf( "client sends end of request: %s\n", build_string_message( msg ) );
 }

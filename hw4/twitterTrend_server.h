@@ -34,7 +34,10 @@ sem_t mut;
 queue_t queue;
 TwitterDBMem_t tdbm;
 FILE *inFile;
+
 bool globalQueue;
+bool verboseDebug;
+
 int serverSocket;
 /* <insert global variables> */
 

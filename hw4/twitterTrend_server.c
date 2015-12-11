@@ -10,34 +10,62 @@ int main( int argc, char *argv[] ) {
 	/* get args */
 	int num_threads;
 	int publicServerPort;
-	if ( argc != 3 && argc != 2) { // invalid range
-		fprintf( stderr, "Incorrect usage.\n" );
-		fprintf( stderr, "\tUsage: %s <port_number> [num_threads = 5]\n", argv[ 0 ] );
-		return 1;
-	}
-	else {
-		if (argc == 2) { //optional param excluded
-			num_threads = 5; //default value
-		}
-		else { //optional param included
-			num_threads = atoi( argv[ 2 ] );
+	switch( argc ) {
+		case 4: //both optional params included
+			if (strlen( argv[ 3 ] ) == 2 &&
+				strcmp( argv[ 3 ], "-v") == 0) {// -v used
+				verboseDebug = true;
+			}
+			else {
+				fprintf( stderr, "Incorrect usage.\n" );
+				fprintf( stderr, "\tUsage: %s <port_number> [num_threads](default = 5) [-v]\n", argv[ 0 ] );	
+			}
+
+			num_threads = atoi( argv[ 2 ] );//TODO: it'd be nice if we error checked this....
 			//num_threads should be > 0
-			if ( num_threads <= 0) {
+			if (num_threads <= 0) {
 				errno = EINVAL;
 				errorFunction( "num_threads is less than or equal to 0, exiting" );
 			}
-		}
-		publicServerPort = atoi( argv[ 1 ] );
-		if ( publicServerPort < 0 || publicServerPort > 65535 ) {
-			errno = EINVAL;
-			errorFunction( "port number is less than 0 or greater than 65535, exiting" );
-	    }
+			break;
+		case 3: //some optional param included
+			if (strlen( argv[ 2 ] ) == 2 &&
+				strcmp( argv[ 2 ], "-v") == 0) {// -v used
+				verboseDebug = true;
+				num_threads = 5;
+			}
+			else {//num_threads used 
+				verboseDebug = false;
+
+				num_threads = atoi( argv[ 2 ] );//TODO: it'd be nice if we error checked this....
+
+				//num_threads should be > 0
+				if (num_threads <= 0) {
+					errno = EINVAL;
+					errorFunction( "num_threads is less than or equal to 0, exiting" );
+				}
+			}
+
+			break;
+		case 2: //no optional params
+			num_threads = 5;
+			verboseDebug = false;
+			break;
+		default: //invalid range
+			fprintf( stderr, "Incorrect usage.\n" );
+			fprintf( stderr, "\tUsage: %s <port_number> [num_threads](default = 5) [-v]\n", argv[ 0 ] );
+			return 1;
+	}
+	publicServerPort = atoi( argv[ 1 ] );
+	if ( publicServerPort < 0 || publicServerPort > 65535 ) {
+		errno = EINVAL;
+		errorFunction( "port number is less than 0 or greater than 65535, exiting" );
 	}
 
 	/* init public server socket */
 	serverSocket = socket( AF_INET, SOCK_STREAM, 0 );//SOCK_STREAM = TCP protocol
 	if (serverSocket == -1)
-		errorFunction( "Failed to create server socket" );//TODO: change error____ to handleError(errno,"___",void *args), which is in a file that handles errors
+		errorFunction( "Failed to create server socket" );//TODO: change error____ to handleError(errno,"___",void *args), which is in a file that handles errors //TODO: remove prev todo out of shame
 
 	/* bind socket to port and listen */
 	struct sockaddr_in serverAddr;
@@ -48,7 +76,9 @@ int main( int argc, char *argv[] ) {
 		errorFunction( "Failed to bind to given port" );
 	if ( listen( serverSocket, 50 )  == -1)//TODO: change backlog amount to whatever it needs to be. (100?)
 		errorFunction( "Failed to listen on socket" );
-	printf( "server listens on port %d\n", publicServerPort);
+
+	if (verboseDebug)
+		printf( "server listens on port %d\n", publicServerPort);
 
 	/* init data structures */
 	readTwitterDB();
@@ -202,9 +232,9 @@ void *processer( void *args ) {
 		clientAddrPort = strcat( strcat( strcat( clientAddrPort, clientAddr ), ","), clientPort );
 
 		/* handshake with client STEP 5/6 */
-		if (serverHandShake( processerClient->socket, clientAddrPort ) == -1) {
+		if (serverHandShake( processerClient->socket, clientAddrPort, verboseDebug ) == -1) {
 			fprintf(stderr, "server failed to complete handshake\n" );
-			break;//TODO: wait, I need to take the client off of the queue
+			break;
 		}
 
 		//strcpy ( originalFileName, processerFileName );//#EXPECTED TO BREAK. NOT DEALT WITH YET# //to makesure finished message outputs correctly;
@@ -292,7 +322,8 @@ void *processer( void *args ) {
 				break;
 				//goes on to close client
 			}
-			printf("server sends twitterTrend response: %s\n", build_string_request_message( response ) );
+			if (verboseDebug)
+				printf("server sends twitterTrend response: %s\n", build_string_request_message( response ) );
 
 			//message ENDOFRES
 			clean_message( response );
@@ -306,12 +337,14 @@ void *processer( void *args ) {
 				break;
 				//goes on to close client
 			}
-			printf("server sends end of response: %s\n", build_string_message( response ) );
+			if (verboseDebug)
+				printf("server sends end of response: %s\n", build_string_message( response ) );
 		}
 
 		/* Step #11: close the connection with client */
 		printf( "Thread %d is finished handling client %s\n", id, clientAddrPort );
-		printf( "server closes the connection from client %s\n", clientAddrPort );
+		if (verboseDebug)
+			printf( "server closes the connection from client %s\n", clientAddrPort );
 		close( processerClient->socket );
 	}
 
@@ -346,7 +379,8 @@ void *queueer( void *args ) {
 		/*output message for acceptance*/
 		{
 			uint32_t ip = ( client.sin_addr.s_addr );//I just wanted to localize this temporary variable
-			printf( "server accepts connection from %s\n", inet_ntoa( *(struct in_addr *)&ip));
+			if (verboseDebug)
+				printf( "server accepts connection from %s\n", inet_ntoa( *(struct in_addr *)&ip));
 		}
 		/* note to self: how to break out
 			//this is a nasty hack

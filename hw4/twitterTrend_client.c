@@ -14,11 +14,11 @@ int main( int argc, char *argv[] ) {
     struct addrinfo hints;
     struct addrinfo *serv_info, *p;
     char *portno = ( char * ) malloc ( sizeof ( char ) * MAXPORTNOSIZE );
-    char **fileArray = ( char ** ) malloc ( sizeof ( char * ) * MAXFILEPATHSIZE * (argc - 3) ); //argc-3 is amount of files given
+	char **fileArray;
     char *host_name = ( char * ) malloc ( sizeof ( char ) * HOST_NAME_MAX );
 
     if ( argc < 4 ) {
-        fprintf( stderr, "Usage : %s <hostname> <port number> <file_path(s)>\n", argv[ 0 ] );
+        fprintf( stderr, "Usage : %s <hostname> <port number> <file_path(s)> [-v]\n", argv[ 0 ] );
         return 1;
     }
 
@@ -35,9 +35,21 @@ int main( int argc, char *argv[] ) {
         return 1;
     }
 
-    for (i = 0; i < ( argc - 3 ); i++ ) {
+	int fileArrayEnd;
+	if (strlen( argv[ argc - 1  ] ) == 2 &&
+		strcmp( argv[ argc - 1  ], "-v") == 0) {// -v used
+		verboseDebug = true;
+		fileArrayEnd = argc - 4; //there are this many files
+	}
+	else {
+		verboseDebug = false;
+		fileArrayEnd = argc - 3;
+	}
+	
+	fileArray = (char **) malloc( sizeof( char * ) * MAXFILEPATHSIZE * fileArrayEnd );
+    for (i = 0; i < fileArrayEnd; i++ ) {
         fileArray[ i ] = ( char * ) malloc ( sizeof ( char ) * MAXFILEPATHSIZE );
-        fileArray[ i ] = argv[ 3 + i ]; //3+i is all of the file arguments
+        fileArray[ i ] = argv[ 3+i ]; //3 is the start of file arguments
     }
 
     //set hints struct to 0 to ensure no garbage values
@@ -67,7 +79,6 @@ int main( int argc, char *argv[] ) {
             continue;
         }
 
-		fprintf(stderr, "Error: Client failed to connect, exiting" );
         break;
     }
 
@@ -75,18 +86,20 @@ int main( int argc, char *argv[] ) {
         errorFunction( "Client failed to connect" );
     }
 
-    printf( "client connects\n" ); //displayed when connection successful
+	if (verboseDebug)
+    	printf( "client connects\n" ); //displayed when connection successful
 
-    if ( clientHandShake( sockfd ) == -1 ) {
+    if ( clientHandShake( sockfd, verboseDebug ) == -1 ) {
         printf( "Error: an error message was sent or recieved during handshake, exiting\n" );
         exit( EXIT_FAILURE );
     }
 
+	/* do communication */
     char *fileName;
     char **cityNames = ( char ** ) malloc ( sizeof ( char * ) * MAXCITYSIZE * MAXCITIES );
     char *cityName = ( char * ) malloc ( sizeof ( char ) * MAXCITYSIZE );
     message_t response_msg;
-    for( int k = 0; k < ( argc - 3 ); k++ ) {
+    for( int k = 0; k < fileArrayEnd; k++ ) {
         fileName = fileArray[ k ];
         cityNames = getCityNames( fileName );
 		if (cityNames == NULL) {
@@ -100,10 +113,11 @@ int main( int argc, char *argv[] ) {
 		strcat( reportFileName, ".result" ); //create name of result file
     	reportFile = fopen( reportFileName, "w+" ); //w+ is truncate read&write
 
+		/* do the kth files communication */
         for (n = 0; cityNames[ n ] != NULL; n++ ) {
             memset( cityName, 0, ( sizeof ( char ) * MAXCITYSIZE ) );
             cityName = cityNames[ n ];
-            twitterTrendRequest( sockfd, cityName );
+            twitterTrendRequest( sockfd, cityName, verboseDebug );
             response_msg = waitForResponse( sockfd );
             if ( acknowledgeEndOfResponse( sockfd ) == -1 ) {
                 printf( "Error: an error message was sent or recieved during end of response, exiting\n" );
@@ -118,11 +132,12 @@ int main( int argc, char *argv[] ) {
             writeReportFile( reportFile, cityName, response_msg );
         }
 
+		//some cleanup....
 		fclose( reportFile );
 		free( reportFileName );
     }
 
-    endRequest( sockfd );
+    endRequest( sockfd, verboseDebug );
 }
 
 char **getCityNames( char *filepath ) {
