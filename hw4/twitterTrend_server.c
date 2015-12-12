@@ -10,7 +10,7 @@ int main( int argc, char *argv[] ) {
 	/* get args */
 	int num_threads;
 	int publicServerPort;
-	switch( argc ) {	
+	switch( argc ) {
 		case 4: //both optional params included
 			if (strlen( argv[ 3 ] ) == 2 &&
 				strcmp( argv[ 3 ], "-v") == 0) {// -v used
@@ -78,7 +78,8 @@ int main( int argc, char *argv[] ) {
 		errorFunction( "Failed to listen on socket" );
 
 	if (!verboseDebug)
-		printf( "server listens\n" );//, publicServerPort);
+		//printf( "server listens on port %d\n", publicServerPort);
+		printf( "server listens\n");
 
 	/* init data structures */
 	readTwitterDB();
@@ -344,7 +345,9 @@ void *processer( void *args ) {
 		/* Step #11: close the connection with client */
 		printf( "Thread %d is finished handling client %s\n", id, clientAddrPort );
 		if (!verboseDebug)
-			printf( "server closes the connection from client %s\n", clientAddrPort );
+			//printf( "server closes the connection from client %s\n", clientAddrPort );
+			printf( "server closes the connection\n" );
+
 		close( processerClient->socket );
 	}
 
@@ -378,9 +381,10 @@ void *queueer( void *args ) {
 
 		/*output message for acceptance*/
 		{
-			uint32_t ip = ( client.sin_addr.s_addr );//I just wanted to localize this temporary variable
+			//uint32_t ip = ( client.sin_addr.s_addr );//I just wanted to localize this temporary variable
 			if (!verboseDebug)
-				printf( "server accepts connection from %s\n", inet_ntoa( *(struct in_addr *)&ip));
+				//printf( "server accepts connection from %s\n", inet_ntoa( *(struct in_addr *)&ip));
+				printf( "server accepts connection\n");
 		}
 		/* note to self: how to break out
 			//this is a nasty hack

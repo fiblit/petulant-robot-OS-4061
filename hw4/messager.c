@@ -201,6 +201,7 @@ int clientHandShake( int sock_fd, bool verboseDebug ) {
 			return -1;
 		}
 		if (!verboseDebug)
+			//printf( "client sends handshake response: %s\n", build_string_message( msg ) );
 			printf( "client sends handshake response:%s\n", build_string_message( msg ) );
 	}
 	return 0;
@@ -210,7 +211,9 @@ int serverHandShake( int sock_fd, char *addr, bool verboseDebug ) {
 	message_t msg = construct_message( HANDSHAKE, NULL );
 	sendMessage( sock_fd, msg );
 	if (!verboseDebug)
-		printf( "server sends handshaking:%s\n", build_string_message( msg ) );//, addr );
+		//printf( "server sends handshaking: %s to client %s\n", build_string_message( msg ), addr );
+		printf( "server sends handshaking:%s\n", build_string_message( msg ) );
+
 	recvMessage( sock_fd, msg );
 	if (msg->id == ERRMSG) {
 		printf( "server detected that client %s experienced an error during handshake, closing connection\n", addr );
@@ -223,7 +226,7 @@ int serverHandShake( int sock_fd, char *addr, bool verboseDebug ) {
 		return -1;
 	}
 	else { //success
-		//if (!verboseDebug)
+		//if (verboseDebug)
 		//	printf( "server received handshake response: %s from client %s\n", build_string_message( msg ), addr );
 	}
 	return 0;

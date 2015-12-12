@@ -7,22 +7,20 @@ EC was completed.
 "Bug" note:
 	The server crashes due to memory leaks if it is over-stressed.
 		The client will exit robustly
-	A lot of the memory leaks were... ugly... we'd get some interesting errors where malloc would
-    fail an assertion when we tried to fix it. Thankfully, the server crashed usually outside of the bounds of the assumptions
+        A lot of the memory leaks were... ugly... we'd get some interesting errors where malloc would
+        fail an assertion when we tried to fix it. Thankfully, the server crashed usually outside of the bounds of the assumptions
 
 	Best Stress Tests:
 		100 concurrent clients with 78 cities each
         1000(0?) concurrent clients with 1 city each (I tried 10k again, but it acted kinda weird, I think it only did 5k on that one)
-		~5000 consecutive clients with 1 city each (I was trying to do 10k and malloc crashed)
+		~5000 consecutive clients with 1 city each (I was trying to do 10k and malloc crasheds
 
 options:
- if there is a "-v" at the end of the command for twitterTrend_client or twitterTrend_server, 
-	they will print the optional debug stuff
- e.g.
-
- $ ./twitterTrend_server 7575 5 -v
- server listens on port 7575
- ^C 
- $ echo ... and so on
- ... and so on
+ the -v option at the end of the command line arguments
+ e.g. "./twitterTrend_server 7575 5 -v" will silence any of the 'optional' debug  output from section
+ 2.3.6 of the requirements
+ e.g.eeeeeeeeeeeeeeeeeeeeeeeeeeeeeee
+   server listens
+   client conencts
+   ...
 
